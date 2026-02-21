@@ -133,8 +133,6 @@ namespace WxDockUI
 		// TODO: Check if such a pane ID already exists
 
 		// Add the pane to the layout:
-		std::cout << "Before addPane(" << aOptions.caption() << "):" << std::endl;
-		dumpLayout(std::cout);
 		auto paneNode = std::make_unique<Layout::PaneNode>(aOptions.paneId());
 		if (aOptions.initialDock() == DockPosition::Center)
 		{
@@ -146,9 +144,6 @@ namespace WxDockUI
 		}
 		Layout::Ops::cleanup(mRoot);
 		updateLayout();
-		std::cout << "After addPane(" << aOptions.caption() << "):" << std::endl;
-		dumpLayout(std::cout);
-		std::cout << std::endl;
 	}
 
 
