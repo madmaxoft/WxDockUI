@@ -42,13 +42,13 @@ namespace WxDockUI::Internal
 		)
 		{
 			mIsDragging = true;
-			mManager.paneDragController().beginDrag(this, wxGetMousePosition());
+			mManager.paneDragController().beginDrag(&mPaneNode, wxGetMousePosition());
 		}
 
 		// Forward the updated mouse position in screen coordinates:
 		if (mIsDragging)
 		{
-			mManager.paneDragController().updateDrag(this, wxGetMousePosition());
+			mManager.paneDragController().updateDrag(&mPaneNode, wxGetMousePosition());
 		}
 
 		aEvent.Skip();
@@ -68,7 +68,7 @@ namespace WxDockUI::Internal
 		if (mIsDragging)
 		{
 			mIsDragging = false;
-			mManager.paneDragController().endDrag(this, wxGetMousePosition());
+			mManager.paneDragController().endDrag(&mPaneNode, wxGetMousePosition());
 		}
 
 		aEvent.Skip();
@@ -82,7 +82,7 @@ namespace WxDockUI::Internal
 	{
 		if (mIsDragging)
 		{
-			mManager.paneDragController().cancelDrag(this);
+			mManager.paneDragController().cancelDrag(&mPaneNode);
 			mIsDragging = false;
 		}
 	}

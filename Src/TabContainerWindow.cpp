@@ -27,11 +27,12 @@ namespace WxDockUI::Internal
 		sizer->Add(mNotebook, 1, wxEXPAND);
 		SetSizer(sizer);
 
-		mNotebook->Bind(
-			wxEVT_NOTEBOOK_PAGE_CHANGED,
-			&TabContainerWindow::onNotebookChanged,
-			this
-		);
+		mNotebook->Bind(wxEVT_NOTEBOOK_PAGE_CHANGED, &TabContainerWindow::onNotebookChanged,   this);
+		mNotebook->Bind(wxEVT_LEFT_DOWN,             &TabContainerWindow::onNotebookLeftDown,  this);
+		mNotebook->Bind(wxEVT_MOTION,                &TabContainerWindow::onNotebookMouseMove, this);
+		mNotebook->Bind(wxEVT_LEFT_UP,               &TabContainerWindow::onNotebookLeftUp,    this);
+		Bind(wxEVT_MOTION,  &TabContainerWindow::onNotebookMouseMove, this);
+		Bind(wxEVT_LEFT_UP, &TabContainerWindow::onNotebookLeftUp,    this);
 	}
 
 
@@ -110,6 +111,102 @@ namespace WxDockUI::Internal
 	void TabContainerWindow::onNotebookChanged(wxBookCtrlEvent & aEvent)
 	{
 		mTabNode.setActiveIndex(mNotebook->GetSelection());
+	}
+
+
+
+
+
+	void TabContainerWindow::onNotebookLeftDown(wxMouseEvent & aEvent)
+	{
+		auto pos = aEvent.GetPosition();
+		long flags = 0;
+		int tabIndex = mNotebook->HitTest(pos, &flags);
+		if (tabIndex == wxNOT_FOUND)
+		{
+			aEvent.Skip();
+			return;
+		}
+
+		mIsDraggingTab = true;
+		mDragTabIndex = tabIndex;
+		mDragStartScreenPos = mNotebook->ClientToScreen(pos);
+
+		CaptureMouse();
+		aEvent.Skip();
+	}
+
+
+
+
+
+	void TabContainerWindow::onNotebookMouseMove(wxMouseEvent & aEvent)
+	{
+		if (!aEvent.Dragging())
+		{
+			aEvent.Skip();
+			return;
+		}
+
+		if (mDraggedPane != nullptr)
+		{
+			mFrameDockManager.paneDragController().updateDrag(mDraggedPane, wxGetMousePosition());
+		}
+		else if (mIsDraggingTab)
+		{
+			auto currentScreenPos = mNotebook->ClientToScreen(aEvent.GetPosition());
+			if (
+				(std::abs(currentScreenPos.x - mDragStartScreenPos.x) < DRAG_THRESHOLD_PIXELS) &&
+				(std::abs(currentScreenPos.y - mDragStartScreenPos.y) < DRAG_THRESHOLD_PIXELS)
+			)
+			{
+				return;
+			}
+			startTabDrag();
+			mIsDraggingTab = false;
+		}
+
+		aEvent.Skip();
+	}
+
+
+
+
+
+	void TabContainerWindow::onNotebookLeftUp(wxMouseEvent & aEvent)
+	{
+		if (HasCapture())
+		{
+			ReleaseMouse();
+		}
+
+		mFrameDockManager.paneDragController().endDrag(mDraggedPane, wxGetMousePosition());
+		mIsDraggingTab = false;
+		mDragTabIndex = wxNOT_FOUND;
+		aEvent.Skip();
+	}
+
+
+
+
+
+	void TabContainerWindow::startTabDrag()
+	{
+		if (mDragTabIndex == wxNOT_FOUND)
+		{
+			return;
+		}
+		if (mDragTabIndex >= static_cast<int>(mTabNode.panes().size()))
+		{
+			return;
+		}
+
+		mDraggedPane = const_cast<Layout::PaneNode *>(mTabNode.pane(mDragTabIndex));
+		if (mDraggedPane == nullptr)
+		{
+			return;
+		}
+		mFrameDockManager.paneDragController().beginDrag(mDraggedPane, mDragStartScreenPos);
 	}
 
 

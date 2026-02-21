@@ -54,10 +54,10 @@ namespace WxDockUI::Internal
 
 		bool isDragging() const;
 
-		void beginDrag(Internal::PaneContainer * aPane, const wxPoint & aScreenPos);
-		void updateDrag(Internal::PaneContainer * aPane, const wxPoint & aScreenPos);
-		void endDrag(Internal::PaneContainer * aPane, const wxPoint & aScreenPos);
-		void cancelDrag(Internal::PaneContainer * aPane);
+		void beginDrag(Layout::PaneNode * aPane, const wxPoint & aScreenPos);
+		void updateDrag(Layout::PaneNode * aPane, const wxPoint & aScreenPos);
+		void endDrag(Layout::PaneNode * aPane, const wxPoint & aScreenPos);
+		void cancelDrag(Layout::PaneNode * aPane);
 
 	private:
 

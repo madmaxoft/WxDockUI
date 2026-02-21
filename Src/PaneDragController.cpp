@@ -32,13 +32,13 @@ namespace WxDockUI::Internal
 
 
 
-	void PaneDragController::beginDrag(Internal::PaneContainer * aPane, const wxPoint & aScreenPos)
+	void PaneDragController::beginDrag(Layout::PaneNode * aPane, const wxPoint & aScreenPos)
 	{
 		if (aPane == nullptr)
 		{
 			return;
 		}
-		mDraggedPane = &aPane->paneNode();
+		mDraggedPane = aPane;
 		mFrameDockManager.dockOverlay().setCurrentDragNode(mDraggedPane);
 		mCurrentTarget.reset();
 		updateUI(aScreenPos);
@@ -48,7 +48,7 @@ namespace WxDockUI::Internal
 
 
 
-	void PaneDragController::updateDrag(Internal::PaneContainer * aPane, const wxPoint & aScreenPos)
+	void PaneDragController::updateDrag(Layout::PaneNode * aPane, const wxPoint & aScreenPos)
 	{
 		if (!isDragging())
 		{
@@ -79,7 +79,7 @@ namespace WxDockUI::Internal
 
 
 
-	void PaneDragController::endDrag(Internal::PaneContainer * aPane, const wxPoint & aScreenPos)
+	void PaneDragController::endDrag(Layout::PaneNode * aPane, const wxPoint & aScreenPos)
 	{
 		if (!isDragging())
 		{
@@ -101,7 +101,7 @@ namespace WxDockUI::Internal
 
 
 
-	void PaneDragController::cancelDrag(Internal::PaneContainer * aPane)
+	void PaneDragController::cancelDrag(Layout::PaneNode * aPane)
 	{
 		if (!isDragging())
 		{
