@@ -103,8 +103,8 @@ namespace WxDockUI::Internal
 		mPaneNode(aPaneNode),
 		mClientWindow(aClientWindow)
 	{
-		#ifndef NDEBUG
-			std::cout << "Creating a PaneContainer for pane " << aPaneNode.paneId() << " at " << this << "." << std::endl;
+		#ifdef WXDOCKUI_DEBUG_LIFETIME
+			std::cout << "Creating a PaneContainer at " << this << " for pane " << aPaneNode.paneId() << "." << std::endl;
 		#endif
 		auto * rootSizer = new wxBoxSizer(wxVERTICAL);
 		mCaptionBar = new wxPanel(this);
@@ -136,8 +136,8 @@ namespace WxDockUI::Internal
 	PaneContainer::~PaneContainer()
 	{
 		mClientWindow->Reparent(mFrameDockManager.frame());
-		#ifndef NDEBUG
-			std::cout << "Deleting a PaneContainer for pane " << mPaneNode.paneId() << " at " << this << "." << std::endl;
+		#ifdef WXDOCKUI_DEBUG_LIFETIME
+			std::cout << "Deleting a PaneContainer at " << this << " for pane " << mPaneNode.paneId() << "." << std::endl;
 		#endif
 	}
 

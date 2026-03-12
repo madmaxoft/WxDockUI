@@ -222,7 +222,7 @@ namespace WxDockUI
 
 		const std::string & paneId = aDraggedPane.paneId();
 		bool didMove = false;
-		#ifndef NDEBUG
+		#ifdef WXDOCKUI_DUMP_LAYOUT_ON_DOCK
 			std::cout << "Performing a dock of pane \"" << paneId << "\" into target " << aTarget.describe() << std::endl;
 			std::cout << "Layout before the dock:" << std::endl;
 			dumpLayout(std::cout);
@@ -262,7 +262,7 @@ namespace WxDockUI
 
 		Layout::Ops::cleanup(mRoot);
 
-		#ifndef NDEBUG
+		#ifdef WXDOCKUI_DUMP_LAYOUT_ON_DOCK
 			std::cout << "Layout after the dock:" << std::endl;
 			dumpLayout(std::cout);
 			std::flush(std::cout);
