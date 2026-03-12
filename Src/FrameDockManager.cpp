@@ -119,6 +119,9 @@ namespace WxDockUI
 	FrameDockManager::~FrameDockManager()
 	{
 		mDockSystem.unregisterManager(this);
+		mLayoutEngine.clear();
+		mPaneWindows.clear();
+		mPaneInfos.clear();
 	}
 
 

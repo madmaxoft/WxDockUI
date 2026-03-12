@@ -153,6 +153,16 @@ namespace WxDockUI::Layout
 
 
 
+	void LayoutEngine::clear()
+	{
+		mPaneContainers.clear();
+		mTabContainers.clear();
+	}
+
+
+
+
+
 	const Layout::PaneNode * LayoutEngine::paneNodeAtScreenPos(const wxPoint & aScreenPos)
 	{
 		for (const auto & container: mPaneContainers)
@@ -162,7 +172,7 @@ namespace WxDockUI::Layout
 				return &container.second->paneNode();
 			}
 		}
-		for (const auto & tab: mTabContainerWindows)
+		for (const auto & tab: mTabContainers)
 		{
 			if (tab.second->GetScreenRect().Contains(aScreenPos))
 			{
@@ -178,16 +188,16 @@ namespace WxDockUI::Layout
 
 	Internal::TabContainer * LayoutEngine::tabContainerWindow(TabNode * aTabNode)
 	{
-		auto itr = mTabContainerWindows.find(aTabNode);
-		if (itr != mTabContainerWindows.end())
+		auto itr = mTabContainers.find(aTabNode);
+		if (itr != mTabContainers.end())
 		{
 			return itr->second.get();
 		}
 
 		// Not found, create a new one:
-		auto tcw = std::make_unique<Internal::TabContainer>(mFrameDockManager, mFrameDockManager.frame(), *aTabNode);
-		auto * raw = tcw.get();
-		mTabContainerWindows.emplace(aTabNode, std::move(tcw));
+		auto tc = std::make_unique<Internal::TabContainer>(mFrameDockManager, mFrameDockManager.frame(), *aTabNode);
+		auto * raw = tc.get();
+		mTabContainers.emplace(aTabNode, std::move(tc));
 		return raw;
 	}
 
@@ -200,7 +210,7 @@ namespace WxDockUI::Layout
 		auto itr = mPaneContainers.find(&aPaneNode);
 		if (itr != mPaneContainers.end())
 		{
-			return itr->second;
+			return itr->second.get();
 		}
 
 		// Create a new one:
@@ -210,9 +220,8 @@ namespace WxDockUI::Layout
 			assert(!"No window found for pane");
 			return nullptr;
 		}
-		auto container = new Internal::PaneContainer(mFrameDockManager, aPaneNode, mFrameDockManager.frame(), window, aPaneNode.paneId());
-		mPaneContainers[&aPaneNode] = container;
-		return container;
+		mPaneContainers[&aPaneNode].reset(new Internal::PaneContainer(mFrameDockManager, aPaneNode, mFrameDockManager.frame(), window, aPaneNode.paneId()));
+		return mPaneContainers[&aPaneNode].get();
 	}
 
 

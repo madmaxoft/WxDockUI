@@ -48,10 +48,10 @@ namespace WxDockUI::Layout
 		WxDockUI::FrameDockManager & mFrameDockManager;
 
 		/** The PaneContainer instances created by this layout engine in mFrameDockManager. */
-		std::unordered_map<const PaneNode *, Internal::PaneContainer *> mPaneContainers;
+		std::unordered_map<const PaneNode *, std::unique_ptr<Internal::PaneContainer>> mPaneContainers;
 
 		/** Mapping of layout TabNodes to the TabContainer instances representing them. */
-		std::unordered_map<Layout::TabNode *, std::unique_ptr<WxDockUI::Internal::TabContainer>> mTabContainerWindows;
+		std::unordered_map<Layout::TabNode *, std::unique_ptr<WxDockUI::Internal::TabContainer>> mTabContainers;
 
 
 
@@ -92,6 +92,8 @@ namespace WxDockUI::Layout
 			const wxRect & aRect
 		);
 
+		/** Deletes all UI. */
+		void clear();
 
 		/** Returns the PaneNode at the specified screen position, or nullptr if none. */
 		const Layout::PaneNode * paneNodeAtScreenPos(const wxPoint & aScreenPos);
@@ -100,9 +102,9 @@ namespace WxDockUI::Layout
 		If no such window exists, creates a new one and remembers it in mTabContainerWindows. */
 		Internal::TabContainer * tabContainerWindow(TabNode * aTabNode);
 
-		/** Internal: Returns the TabContainerWindow representing the specified layout tab node.
-		If no such window exists, creates a new one and remembers it in mTabContainerWindows.
-		Returns nullptr (and asserts) if the pane's window cannot be found. */
+		/** Internal: Returns the PaneContainer representing the specified layout pane node.
+		If no such container exists, creates a new one and remembers it in mPaneContainers.
+		Returns nullptr (and asserts) if the pane's UI window cannot be found in mFrameDockManager. */
 		Internal::PaneContainer * paneContainer(const PaneNode & aPaneNode);
 	};
 

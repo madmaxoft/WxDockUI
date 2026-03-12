@@ -41,7 +41,7 @@ namespace WxDockUI::Internal
 		/** The movement threshold before a drag operation is started. */
 		static constexpr int DRAG_THRESHOLD_PIXELS = 5;
 
-		FrameDockManager & mManager;
+		FrameDockManager & mFrameDockManager;
 
 		/** The layout's PaneNode being represented by this UI container. */
 		const Layout::PaneNode & mPaneNode;
@@ -65,14 +65,16 @@ namespace WxDockUI::Internal
 
 	public:
 
+		/** Creates a new container and reparents the client window into it. */
 		PaneContainer(
-			FrameDockManager & aManager,
+			FrameDockManager & aFrameDockManager,
 			const Layout::PaneNode & aPaneNode,
 			wxWindow * aParent,
 			wxWindow * aClientWindow,
 			const wxString & aCaption
 		);
 
+		/** Destroys the instance, reparenting the client window back into mFrameDockManager's frame. */
 		~PaneContainer();
 
 		// Getters:

@@ -48,7 +48,7 @@ namespace WxDockUI::Internal
 
 			/** The sizer that takes care of sizing the pane's contents into mPanel upon mPanel's size change.
 			Owned by mPanel. */
-			wxBoxSizer * mSizer;
+			wxBoxSizer * mSizer = nullptr;
 
 			/** The pane's caption. */
 			std::string mCaption;

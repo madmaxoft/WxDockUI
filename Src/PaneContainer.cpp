@@ -42,13 +42,13 @@ namespace WxDockUI::Internal
 		)
 		{
 			mIsDragging = true;
-			mManager.paneDragController().beginDrag(&mPaneNode, wxGetMousePosition());
+			mFrameDockManager.paneDragController().beginDrag(&mPaneNode, wxGetMousePosition());
 		}
 
 		// Forward the updated mouse position in screen coordinates:
 		if (mIsDragging)
 		{
-			mManager.paneDragController().updateDrag(&mPaneNode, wxGetMousePosition());
+			mFrameDockManager.paneDragController().updateDrag(&mPaneNode, wxGetMousePosition());
 		}
 
 		aEvent.Skip();
@@ -68,7 +68,7 @@ namespace WxDockUI::Internal
 		if (mIsDragging)
 		{
 			mIsDragging = false;
-			mManager.paneDragController().endDrag(&mPaneNode, wxGetMousePosition());
+			mFrameDockManager.paneDragController().endDrag(&mPaneNode, wxGetMousePosition());
 		}
 
 		aEvent.Skip();
@@ -82,7 +82,7 @@ namespace WxDockUI::Internal
 	{
 		if (mIsDragging)
 		{
-			mManager.paneDragController().cancelDrag(&mPaneNode);
+			mFrameDockManager.paneDragController().cancelDrag(&mPaneNode);
 			mIsDragging = false;
 		}
 	}
@@ -92,19 +92,19 @@ namespace WxDockUI::Internal
 
 
 	PaneContainer::PaneContainer(
-		FrameDockManager & aManager,
+		FrameDockManager & aFrameDockManager,
 		const Layout::PaneNode & aPaneNode,
 		wxWindow * aParent,
 		wxWindow * aClientWindow,
 		const wxString & aCaption
 	):
 		wxPanel(aParent),
-		mManager(aManager),
+		mFrameDockManager(aFrameDockManager),
 		mPaneNode(aPaneNode),
 		mClientWindow(aClientWindow)
 	{
 		#ifndef NDEBUG
-			std::cout << "Creating a PaneContainer for pane " << aPaneNode.paneId() << std::endl;
+			std::cout << "Creating a PaneContainer for pane " << aPaneNode.paneId() << " at " << this << "." << std::endl;
 		#endif
 		auto * rootSizer = new wxBoxSizer(wxVERTICAL);
 		mCaptionBar = new wxPanel(this);
@@ -135,8 +135,9 @@ namespace WxDockUI::Internal
 
 	PaneContainer::~PaneContainer()
 	{
+		mClientWindow->Reparent(mFrameDockManager.frame());
 		#ifndef NDEBUG
-			std::cout << "Deleting a PaneContainer for pane " << mPaneNode.paneId() << std::endl;
+			std::cout << "Deleting a PaneContainer for pane " << mPaneNode.paneId() << " at " << this << "." << std::endl;
 		#endif
 	}
 

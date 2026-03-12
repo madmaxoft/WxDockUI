@@ -138,6 +138,8 @@ namespace WxDockUI::Layout
 		/** Creates a new instance with the specified ID and Floating intended dock. */
 		explicit PaneNode(const std::string & aPaneId);
 
+		~PaneNode();
+
 		// Getters / setters:
 		const std::string & paneId() const { return mPaneId; }
 		WxDockUI::DockPosition intendedDockPos() const { return mIntendedDockPos; }

@@ -1,6 +1,7 @@
 #include <WxDockUI/Internal/Layout.h>
 #include <algorithm>
 #include <cassert>
+#include <iostream>
 
 
 
@@ -158,6 +159,9 @@ namespace WxDockUI::Layout
 		mPaneId(aPaneId),
 		mIntendedDockPos(aIntendedDockPos)
 	{
+		#ifndef NDEBUG
+			std::cout << "Created a PaneNode at " << this << ", id " << mPaneId << std::endl;
+		#endif
 	}
 
 
@@ -167,6 +171,20 @@ namespace WxDockUI::Layout
 	PaneNode::PaneNode(const std::string & aPaneId):
 		PaneNode(aPaneId, WxDockUI::DockPosition::Floating)
 	{
+		#ifndef NDEBUG
+			std::cout << "Created a PaneNode at " << this << ", id " << mPaneId << std::endl;
+		#endif
+	}
+
+
+
+
+
+	PaneNode::~PaneNode()
+	{
+		#ifndef NDEBUG
+			std::cout << "Deleting a PaneNode at " << this << ", id " << mPaneId << std::endl;
+		#endif
 	}
 
 
