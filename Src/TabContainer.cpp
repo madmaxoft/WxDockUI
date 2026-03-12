@@ -214,6 +214,7 @@ namespace WxDockUI::Internal
 		mFrameDockManager.paneDragController().endDrag(mDraggedPane, wxGetMousePosition());
 		mIsDraggingTab = false;
 		mDragTabIndex = wxNOT_FOUND;
+		mDraggedPane = nullptr;
 		aEvent.Skip();
 	}
 
