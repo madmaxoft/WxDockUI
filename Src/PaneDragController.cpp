@@ -237,7 +237,7 @@ namespace WxDockUI::Internal
 		wxWindow * wnd;
 		if (pane->parent()->type() == WxDockUI::Layout::NodeType::Tab)
 		{
-			wnd = mFrameDockManager.layoutEngine().tabContainerWindow(pane->parent()->asTabNode());
+			wnd = mFrameDockManager.layoutEngine().ensureTabContainer(pane->parent()->asTabNode());
 		}
 		else
 		{

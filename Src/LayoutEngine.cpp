@@ -86,10 +86,10 @@ namespace WxDockUI::Layout
 		const wxRect & aRect
 	)
 	{
-		auto container = paneContainer(aNode);
+		auto container = ensurePaneContainer(aNode);
 		if (container == nullptr)
 		{
-			assert(!"Invalid pane container");
+			assert(!"Failed to create a pane container");
 			return;
 		}
 		container->Reparent(aParent);
@@ -107,19 +107,19 @@ namespace WxDockUI::Layout
 		const wxRect & aRect
 	)
 	{
-		auto * tabWindow = tabContainerWindow(&aNode);
-		if (tabWindow == nullptr)
+		auto * tc = ensureTabContainer(&aNode);
+		if (tc == nullptr)
 		{
 			assert(!"Failed to create TabContainer");
 			return;
 		}
-		tabWindow->updateLayout();
-		if (tabWindow->GetParent() != aParent)
+		tc->updateLayout();
+		if (tc->GetParent() != aParent)
 		{
-			tabWindow->Reparent(aParent);
+			tc->Reparent(aParent);
 		}
-		tabWindow->SetSize(aRect);
-		tabWindow->Show();
+		tc->SetSize(aRect);
+		tc->Show();
 	}
 
 
@@ -186,7 +186,7 @@ namespace WxDockUI::Layout
 
 
 
-	Internal::TabContainer * LayoutEngine::tabContainerWindow(TabNode * aTabNode)
+	Internal::TabContainer * LayoutEngine::ensureTabContainer(TabNode * aTabNode)
 	{
 		auto itr = mTabContainers.find(aTabNode);
 		if (itr != mTabContainers.end())
@@ -205,7 +205,7 @@ namespace WxDockUI::Layout
 
 
 
-	Internal::PaneContainer * LayoutEngine::paneContainer(const PaneNode & aPaneNode)
+	Internal::PaneContainer * LayoutEngine::ensurePaneContainer(const PaneNode & aPaneNode)
 	{
 		auto itr = mPaneContainers.find(&aPaneNode);
 		if (itr != mPaneContainers.end())
@@ -222,6 +222,20 @@ namespace WxDockUI::Layout
 		}
 		mPaneContainers[&aPaneNode].reset(new Internal::PaneContainer(mFrameDockManager, aPaneNode, mFrameDockManager.frame(), window, aPaneNode.paneId()));
 		return mPaneContainers[&aPaneNode].get();
+	}
+
+
+
+
+
+	Internal::PaneContainer * LayoutEngine::maybePaneContainer(const PaneNode & aPaneNode)
+	{
+		auto itr = mPaneContainers.find(&aPaneNode);
+		if (itr != mPaneContainers.end())
+		{
+			return itr->second.get();
+		}
+		return nullptr;
 	}
 
 

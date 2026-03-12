@@ -100,12 +100,16 @@ namespace WxDockUI::Layout
 
 		/** Internal: Returns the TabContainer representing the specified layout tab node.
 		If no such window exists, creates a new one and remembers it in mTabContainerWindows. */
-		Internal::TabContainer * tabContainerWindow(TabNode * aTabNode);
+		Internal::TabContainer * ensureTabContainer(TabNode * aTabNode);
 
 		/** Internal: Returns the PaneContainer representing the specified layout pane node.
 		If no such container exists, creates a new one and remembers it in mPaneContainers.
 		Returns nullptr (and asserts) if the pane's UI window cannot be found in mFrameDockManager. */
-		Internal::PaneContainer * paneContainer(const PaneNode & aPaneNode);
+		Internal::PaneContainer * ensurePaneContainer(const PaneNode & aPaneNode);
+
+		/** Internal: Returns the PaneContainer representing the specified layout pane node.
+		If no such container exists, returns nullptr. */
+		Internal::PaneContainer * maybePaneContainer(const PaneNode & aPaneNode);
 	};
 
 

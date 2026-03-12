@@ -107,7 +107,7 @@ namespace WxDockUI::Internal
 			if (usedPanes.find(itr->first) == usedPanes.end())
 			{
 				// Remove Tab:
-				auto paneContents = mFrameDockManager.layoutEngine().paneContainer(*(itr->first));
+				auto paneContents = mFrameDockManager.layoutEngine().maybePaneContainer(*(itr->first));
 				if (paneContents != nullptr)
 				{
 					if (paneContents->GetParent() == itr->second.mPanel.get())
@@ -254,15 +254,16 @@ namespace WxDockUI::Internal
 
 		// First time seeing this pane, create a new panel for it and reparent the pane contents into it:
 		tab.mPanel.reset(new wxPanel(mNotebook));
-		auto * window = mFrameDockManager.layoutEngine().paneContainer(aPaneNode);
+		auto * window = mFrameDockManager.layoutEngine().ensurePaneContainer(aPaneNode);
 		if (window == nullptr)
 		{
-			throw std::runtime_error("Unknown window for a pane");
+			assert(!"Unknown pane container");
+			throw std::runtime_error("Unknown pane container");
 		}
 		const auto * paneInfo = mFrameDockManager.findPaneInfo(aPaneNode.paneId());
 		if (paneInfo == nullptr)
 		{
-			throw std::runtime_error("Unknown paneInfo for a known window");
+			throw std::runtime_error("Unknown paneInfo for a known pane");
 		}
 		tab.mCaption = paneInfo->caption();
 		auto oldSizer = window->GetContainingSizer();
