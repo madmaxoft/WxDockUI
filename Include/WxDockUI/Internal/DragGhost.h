@@ -1,6 +1,6 @@
 #pragma once
 
-#include <wx/popupwin.h>
+#include <wx/frame.h>
 #include <wx/panel.h>
 
 
@@ -15,10 +15,10 @@ namespace WxDockUI::Internal
 
 
 	/** Represents a visual cue displayed while dragging a PaneContainer. */
-	class GhostFrame final:
-		public wxPopupWindow
+	class DragGhost final:
+		public wxFrame
 	{
-		using Super = wxPopupWindow;
+		using Super = wxFrame;
 
 
 		wxPanel * mContent = nullptr;
@@ -26,7 +26,7 @@ namespace WxDockUI::Internal
 
 	public:
 
-		explicit GhostFrame(wxWindow * aParent);
+		DragGhost();
 	};
 
 

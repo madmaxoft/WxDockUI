@@ -1,7 +1,7 @@
 #include <WxDockUI/Internal/LayoutEngine.h>
 #include <WxDockUI/Internal/Layout.h>
 #include <WxDockUI/Internal/PaneContainer.h>
-#include <WxDockUI/Internal/TabContainerWindow.h>
+#include <WxDockUI/Internal/TabContainer.h>
 #include <WxDockUI/FrameDockManager.h>
 
 
@@ -86,24 +86,13 @@ namespace WxDockUI::Layout
 		const wxRect & aRect
 	)
 	{
-		Internal::PaneContainer * container = nullptr;
-		auto itr = mPaneContainers.find(&aNode);
-		if (itr == mPaneContainers.end())
+		auto container = paneContainer(aNode);
+		if (container == nullptr)
 		{
-			auto window = mFrameDockManager.findPaneWindow(aNode.paneId());
-			if (window == nullptr)
-			{
-				assert(!"No window found for pane");
-				return;
-			}
-			container = new Internal::PaneContainer(mFrameDockManager, aNode, aParent, window, aNode.paneId());
-			mPaneContainers[&aNode] = container;
+			assert(!"Invalid pane container");
+			return;
 		}
-		else
-		{
-			container = itr->second;
-		}
-
+		container->Reparent(aParent);
 		container->SetSize(aRect);
 		container->Show();
 	}
@@ -121,6 +110,7 @@ namespace WxDockUI::Layout
 		auto * tabWindow = tabContainerWindow(&aNode);
 		if (tabWindow == nullptr)
 		{
+			assert(!"Failed to create TabContainer");
 			return;
 		}
 		tabWindow->updateLayout();
@@ -163,7 +153,7 @@ namespace WxDockUI::Layout
 
 
 
-	Layout::PaneNode * LayoutEngine::paneNodeAtScreenPos(const wxPoint & aScreenPos)
+	const Layout::PaneNode * LayoutEngine::paneNodeAtScreenPos(const wxPoint & aScreenPos)
 	{
 		for (const auto & container: mPaneContainers)
 		{
@@ -186,7 +176,7 @@ namespace WxDockUI::Layout
 
 
 
-	Internal::TabContainerWindow * LayoutEngine::tabContainerWindow(TabNode * aTabNode)
+	Internal::TabContainer * LayoutEngine::tabContainerWindow(TabNode * aTabNode)
 	{
 		auto itr = mTabContainerWindows.find(aTabNode);
 		if (itr != mTabContainerWindows.end())
@@ -195,10 +185,34 @@ namespace WxDockUI::Layout
 		}
 
 		// Not found, create a new one:
-		auto tcw = std::make_unique<Internal::TabContainerWindow>(mFrameDockManager, mFrameDockManager.frame(), *aTabNode);
+		auto tcw = std::make_unique<Internal::TabContainer>(mFrameDockManager, mFrameDockManager.frame(), *aTabNode);
 		auto * raw = tcw.get();
 		mTabContainerWindows.emplace(aTabNode, std::move(tcw));
 		return raw;
+	}
+
+
+
+
+
+	Internal::PaneContainer * LayoutEngine::paneContainer(const PaneNode & aPaneNode)
+	{
+		auto itr = mPaneContainers.find(&aPaneNode);
+		if (itr != mPaneContainers.end())
+		{
+			return itr->second;
+		}
+
+		// Create a new one:
+		auto window = mFrameDockManager.findPaneWindow(aPaneNode.paneId());
+		if (window == nullptr)
+		{
+			assert(!"No window found for pane");
+			return nullptr;
+		}
+		auto container = new Internal::PaneContainer(mFrameDockManager, aPaneNode, mFrameDockManager.frame(), window, aPaneNode.paneId());
+		mPaneContainers[&aPaneNode] = container;
+		return container;
 	}
 
 

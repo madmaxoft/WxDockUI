@@ -31,7 +31,8 @@ namespace WxDockUI::Internal
 
 
 	/** A visual container for a single Layout::PaneNode.
-	Provides the caption, close button, etc. */
+	Can provide a caption, close button, etc., based on the settings.
+	Each PaneNode has an instance of this class, tracked and owned by a LayoutEngine. */
 	class PaneContainer final:
 		public wxPanel
 	{
@@ -43,7 +44,7 @@ namespace WxDockUI::Internal
 		FrameDockManager & mManager;
 
 		/** The layout's PaneNode being represented by this UI container. */
-		Layout::PaneNode & mPaneNode;
+		const Layout::PaneNode & mPaneNode;
 
 		// Visual:
 		wxPanel * mCaptionBar = nullptr;
@@ -66,15 +67,17 @@ namespace WxDockUI::Internal
 
 		PaneContainer(
 			FrameDockManager & aManager,
-			Layout::PaneNode & aPaneNode,
+			const Layout::PaneNode & aPaneNode,
 			wxWindow * aParent,
 			wxWindow * aClientWindow,
 			const wxString & aCaption
 		);
 
+		~PaneContainer();
+
 		// Getters:
 		wxWindow * clientWindow() const { return mClientWindow; }
-		Layout::PaneNode & paneNode() const { return mPaneNode; }
+		const Layout::PaneNode & paneNode() const { return mPaneNode; }
 	};
 
 

@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 
 project(WxDockUI LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 
@@ -10,13 +10,13 @@ set(srcs
 	Src/DockOverlay.cpp
 	Src/DockSystem.cpp
 	Src/FrameDockManager.cpp
-	Src/GhostFrame.cpp
+	Src/DragGhost.cpp
 	Src/Layout.cpp
 	Src/LayoutEngine.cpp
 	Src/LayoutOps.cpp
 	Src/PaneContainer.cpp
 	Src/PaneDragController.cpp
-	Src/TabContainerWindow.cpp
+	Src/TabContainer.cpp
 )
 
 set(hdrs
@@ -29,13 +29,13 @@ set(hdrs
 	# Internal headers:
 	Include/WxDockUI/Internal/DockOverlay.h
 	Include/WxDockUI/Internal/DockTarget.h
-	Include/WxDockUI/Internal/GhostFrame.h
+	Include/WxDockUI/Internal/DragGhost.h
 	Include/WxDockUI/Internal/Layout.h
 	Include/WxDockUI/Internal/LayoutEngine.h
 	Include/WxDockUI/Internal/LayoutOps.h
 	Include/WxDockUI/Internal/PaneContainer.h
 	Include/WxDockUI/Internal/PaneDragController.h
-	Include/WxDockUI/Internal/TabContainerWindow.h
+	Include/WxDockUI/Internal/TabContainer.h
 )
 
 # NOTE: shared library is disabled for now only for development comfort (QTCreator complains about multiple

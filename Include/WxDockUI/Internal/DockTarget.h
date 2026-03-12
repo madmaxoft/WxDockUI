@@ -1,16 +1,11 @@
 #pragma once
 
+#include <string>
+#include <format>
+#include <cassert>
+
 #include <WxDockUI/Enums.h>
-
-
-
-
-
-// fwd:
-namespace WxDockUI::Layout
-{
-	class PaneNode;
-}
+#include <WxDockUI/Internal/Layout.h>
 
 
 
@@ -40,7 +35,7 @@ namespace WxDockUI::Internal
 			PaneTab
 		} mKind = Kind::Invalid;
 
-		WxDockUI::Layout::PaneNode * mPane = nullptr;
+		const WxDockUI::Layout::PaneNode * mPane = nullptr;
 
 		bool isValid() const
 		{
@@ -143,6 +138,28 @@ namespace WxDockUI::Internal
 				(aKind == Kind::PaneSplitTop)    ||
 				(aKind == Kind::PaneSplitBottom)
 			);
+		}
+
+
+
+		/** Returns a human-readable description of the target, used for debugging dumps. */
+		std::string describe() const
+		{
+			switch (mKind)
+			{
+				case Kind::Invalid:         return "Invalid";
+				case Kind::RootSplitTop:    return "RootSplitTop";
+				case Kind::RootSplitLeft:   return "RootSplitLeft";
+				case Kind::RootSplitBottom: return "RootSplitBottom";
+				case Kind::RootSplitRight:  return "RootSplitRight";
+				case Kind::PaneSplitTop:    return std::format("PaneSplitTop({})",    mPane->paneId());
+				case Kind::PaneSplitLeft:   return std::format("PaneSplitLeft({})",   mPane->paneId());
+				case Kind::PaneSplitBottom: return std::format("PaneSplitBottom({})", mPane->paneId());
+				case Kind::PaneSplitRight:  return std::format("PaneSplitRight({})",  mPane->paneId());
+				case Kind::PaneTab:         return std::format("PaneTab({})",         mPane->paneId());
+			}
+			assert(!"Unknown target kind");
+			return "Unknown target kind";
 		}
 	};
 

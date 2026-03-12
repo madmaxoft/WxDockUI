@@ -16,7 +16,7 @@ namespace WxDockUI
 	namespace Internal
 	{
 		class PaneContainer;
-		class TabContainerWindow;
+		class TabContainer;
 	}
 	namespace Layout
 	{
@@ -40,7 +40,7 @@ namespace WxDockUI::Layout
 
 
 	/** Processes layout into actual UI elements that can be displayed.
-	Attaches PaneContainer instances to PaneNodes and TabContainerWindow instnces to TabNodes.
+	Attaches PaneContainer instances to PaneNodes and TabContainerWindow instances to TabNodes.
 	Since it knows about all the geometry, it also performs hit-testing */
 	class LayoutEngine
 	{
@@ -48,10 +48,10 @@ namespace WxDockUI::Layout
 		WxDockUI::FrameDockManager & mFrameDockManager;
 
 		/** The PaneContainer instances created by this layout engine in mFrameDockManager. */
-		std::unordered_map<PaneNode *, Internal::PaneContainer *> mPaneContainers;
+		std::unordered_map<const PaneNode *, Internal::PaneContainer *> mPaneContainers;
 
-		/** Mapping of layout TabNodes to the TabContainerWindow instances representing them. */
-		std::unordered_map<Layout::TabNode *, std::unique_ptr<WxDockUI::Internal::TabContainerWindow>> mTabContainerWindows;
+		/** Mapping of layout TabNodes to the TabContainer instances representing them. */
+		std::unordered_map<Layout::TabNode *, std::unique_ptr<WxDockUI::Internal::TabContainer>> mTabContainerWindows;
 
 
 
@@ -92,12 +92,18 @@ namespace WxDockUI::Layout
 			const wxRect & aRect
 		);
 
+
 		/** Returns the PaneNode at the specified screen position, or nullptr if none. */
-		Layout::PaneNode * paneNodeAtScreenPos(const wxPoint & aScreenPos);
+		const Layout::PaneNode * paneNodeAtScreenPos(const wxPoint & aScreenPos);
+
+		/** Internal: Returns the TabContainer representing the specified layout tab node.
+		If no such window exists, creates a new one and remembers it in mTabContainerWindows. */
+		Internal::TabContainer * tabContainerWindow(TabNode * aTabNode);
 
 		/** Internal: Returns the TabContainerWindow representing the specified layout tab node.
-		If no such window exists, creates a new one and remembers it in mTabContainerWindows. */
-		Internal::TabContainerWindow * tabContainerWindow(Layout::TabNode * aTabNode);
+		If no such window exists, creates a new one and remembers it in mTabContainerWindows.
+		Returns nullptr (and asserts) if the pane's window cannot be found. */
+		Internal::PaneContainer * paneContainer(const PaneNode & aPaneNode);
 	};
 
 

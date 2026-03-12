@@ -1,7 +1,7 @@
 #include <WxDockUI/FrameDockManager.h>
 #include <WxDockUI/DockSystem.h>
 #include <WxDockUI/Internal/PaneContainer.h>
-#include <WxDockUI/Internal/TabContainerWindow.h>
+#include <WxDockUI/Internal/TabContainer.h>
 #include <WxDockUI/Internal/LayoutOps.h>
 
 
@@ -166,15 +166,7 @@ namespace WxDockUI
 
 	void FrameDockManager::dumpLayout(std::ostream & aOut) const
 	{
-		aOut << "FrameDockManager layout:\n";
-
-		if (mRoot.child() == nullptr)
-		{
-			aOut << "\t<empty>\n";
-			return;
-		}
-
-		mRoot.child()->dump(aOut, 1);
+		mRoot.dump(aOut, 1);
 	}
 
 
@@ -218,7 +210,7 @@ namespace WxDockUI
 
 
 
-	void FrameDockManager::performDock(Layout::PaneNode & aDraggedPane, const Internal::DockTarget & aTarget)
+	void FrameDockManager::performDock(const Layout::PaneNode & aDraggedPane, const Internal::DockTarget & aTarget)
 	{
 		if (!aTarget.isValid())
 		{
@@ -226,9 +218,12 @@ namespace WxDockUI
 		}
 
 		const std::string & paneId = aDraggedPane.paneId();
-
 		bool didMove = false;
-
+		#ifndef NDEBUG
+			std::cout << "Performing a dock of pane \"" << paneId << "\" into target " << aTarget.describe() << std::endl;
+			std::cout << "Layout before the dock:" << std::endl;
+			dumpLayout(std::cout);
+		#endif
 		if (aTarget.isRootSplit())
 		{
 			auto pos = aTarget.dockPosition();
@@ -247,7 +242,7 @@ namespace WxDockUI
 				return;
 			}
 			auto pos = aTarget.dockPosition();
-			didMove = Layout::Ops::movePaneToNodeEdge(mRoot, paneId, *aTarget.mPane, pos);
+			didMove = Layout::Ops::movePaneToNodeEdge(mRoot, paneId, const_cast<Layout::PaneNode &>(*aTarget.mPane), pos);
 		}
 		else if (aTarget.mKind == Internal::DockTarget::Kind::PaneTab)
 		{
@@ -265,6 +260,9 @@ namespace WxDockUI
 		Layout::Ops::cleanup(mRoot);
 
 		#ifndef NDEBUG
+			std::cout << "Layout after the dock:" << std::endl;
+			dumpLayout(std::cout);
+			std::flush(std::cout);
 			Layout::Ops::validateLayoutTree(mRoot, &std::cerr);
 		#endif
 

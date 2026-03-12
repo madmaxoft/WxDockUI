@@ -36,7 +36,7 @@ namespace WxDockUI::Internal
 
 
 
-	void DockOverlay::setCurrentDragNode(Layout::BaseNode * aCurrentDragNode)
+	void DockOverlay::setCurrentDragNode(const Layout::BaseNode * aCurrentDragNode)
 	{
 		mCurrentDragNode = aCurrentDragNode;
 		recalcIconRects();

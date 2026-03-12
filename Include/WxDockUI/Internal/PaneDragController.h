@@ -3,7 +3,7 @@
 #include <optional>
 
 #include <WxDockUI/Internal/DockTarget.h>
-#include <WxDockUI/Internal/GhostFrame.h>
+#include <WxDockUI/Internal/DragGhost.h>
 
 #include <wx/wx.h>
 
@@ -40,12 +40,12 @@ namespace WxDockUI::Internal
 
 		/** The pane being currently dragged.
 		nullptr if not dragging anything. */
-		Layout::PaneNode * mDraggedPane = nullptr;
+		const Layout::PaneNode * mDraggedPane = nullptr;
 
 		std::optional<WxDockUI::Internal::DockTarget> mCurrentTarget;
 
 		/** The ghost used to visualise dragging a pane around. */
-		Internal::GhostFrame * mDragGhost = nullptr;
+		Internal::DragGhost * mDragGhost = nullptr;
 
 
 	public:
@@ -54,10 +54,10 @@ namespace WxDockUI::Internal
 
 		bool isDragging() const;
 
-		void beginDrag(Layout::PaneNode * aPane, const wxPoint & aScreenPos);
-		void updateDrag(Layout::PaneNode * aPane, const wxPoint & aScreenPos);
-		void endDrag(Layout::PaneNode * aPane, const wxPoint & aScreenPos);
-		void cancelDrag(Layout::PaneNode * aPane);
+		void beginDrag(const Layout::PaneNode * aPane, const wxPoint & aScreenPos);
+		void updateDrag(const Layout::PaneNode * aPane, const wxPoint & aScreenPos);
+		void endDrag(const Layout::PaneNode * aPane, const wxPoint & aScreenPos);
+		void cancelDrag(const Layout::PaneNode * aPane);
 
 	private:
 

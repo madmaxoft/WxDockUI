@@ -30,8 +30,8 @@ namespace WxDockUI
 	namespace Internal
 	{
 		class PaneContainer;
-		class GhostFrame;
-		class TabContainerWindow;
+		class DragGhost;
+		class TabContainer;
 	}
 
 
@@ -112,7 +112,7 @@ namespace WxDockUI
 		std::unordered_map<PaneId, PaneInfo> mPaneInfos;
 
 		/** The ghost used to visualise dragging a pane around. */
-		Internal::GhostFrame * mDragGhost = nullptr;
+		Internal::DragGhost * mDragGhost = nullptr;
 
 
 	public:
@@ -142,7 +142,8 @@ namespace WxDockUI
 		// Layout update
 		void updateLayout();
 
-		/** Dumps the complete layout to the specified ostream, in an indented-tree format. */
+		/** Dumps the complete layout to the specified ostream, in an indented-tree format.
+		Note that the format is directly usable to build a layout tree in a test in LayoutOpsTest.cpp. */
 		void dumpLayout(std::ostream & aOut) const;
 
 		// Getters for the specific action engines / controllers:
@@ -162,7 +163,7 @@ namespace WxDockUI
 		const PaneInfo * findPaneInfo(const PaneId & aId);
 
 		/** Internal: Performs the dock operation on aDraggedPane specified by the target. */
-		void performDock(Layout::PaneNode & aDraggedPane, const Internal::DockTarget & aTarget);
+		void performDock(const Layout::PaneNode & aDraggedPane, const Internal::DockTarget & aTarget);
 	};
 
 

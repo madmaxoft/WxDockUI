@@ -46,8 +46,8 @@ namespace WxDockUI::Internal
 
 		wxPoint mCurrentMouseScreenPos;
 
-		Layout::BaseNode * mCurrentDragNode = nullptr;
-		Layout::PaneNode * mHoveredPane = nullptr;
+		const Layout::BaseNode * mCurrentDragNode = nullptr;
+		const Layout::PaneNode * mHoveredPane = nullptr;
 		wxRect mHoveredPaneRectScreen;
 
 		/** Icon rects in screen coordinates */
@@ -60,7 +60,7 @@ namespace WxDockUI::Internal
 
 		/** Notifies about the layout node that is currently being dragged.
 		Used to remove targets within the currently dragged node. */
-		void setCurrentDragNode(Layout::BaseNode * aCurrentDragNode);
+		void setCurrentDragNode(const Layout::BaseNode * aCurrentDragNode);
 
 		/** Shows or hides the overlay. */
 		void showOverlay(bool aShow);

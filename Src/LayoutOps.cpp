@@ -256,7 +256,7 @@ namespace WxDockUI::Layout::Ops
 					// Extract the pane from the parent:
 					auto * parent = center->parent();
 					std::unique_ptr<BaseNode> extractedNode;
-					if (parent == nullptr)
+					if ((parent == nullptr) || (parent->type() == NodeType::Root))
 					{
 						extractedNode = aRoot.setChild(nullptr);
 					}
@@ -277,7 +277,7 @@ namespace WxDockUI::Layout::Ops
 					tab->insertPane(std::move(oldPane), 0);
 					tab->insertPane(std::move(aPaneNode), 1);
 					tab->setActiveIndex(1);
-					if (parent == nullptr)
+					if ((parent == nullptr) || (parent->type() == NodeType::Root))
 					{
 						aRoot.setChild(std::move(tab));
 					}
@@ -610,23 +610,14 @@ namespace WxDockUI::Layout::Ops
 		// Parent is incompatible (wrong orientation or not a split)
 		// Create a new split and replace the effective target with it
 		auto newSplit = std::make_unique<SplitNode>(orientation);
+		auto newSplitRaw = newSplit.get();
 
 		// Extract the effective target from its parent
 		std::unique_ptr<BaseNode> targetOwnership;
-		if (auto parentSplitNode = parent->asSplitNode(); parentSplitNode != nullptr)
+		auto parentSplitNode = parent->asSplitNode();
+		if (parentSplitNode != nullptr)
 		{
 			targetOwnership = parentSplitNode->replaceChild(effectiveTarget, std::move(newSplit));
-			// Get pointer to the newly inserted split (now owned by parent)
-			SplitNode * newSplitRaw = nullptr;
-			for (const auto & ch : parentSplitNode->children())
-			{
-				if (auto split = ch.mNode->asSplitNode(); split != nullptr)
-				{
-					newSplitRaw = split;
-					break;
-				}
-			}
-			assert(newSplitRaw != nullptr);
 
 			// Now insert the effective target and removed pane into the new split
 			if ((aEdge == DockPosition::Left) || (aEdge == DockPosition::Top))

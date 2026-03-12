@@ -1,6 +1,6 @@
 #include <WxDockUI/Internal/PaneDragController.h>
 #include <WxDockUI/Internal/PaneContainer.h>
-#include <WxDockUI/Internal/TabContainerWindow.h>
+#include <WxDockUI/Internal/TabContainer.h>
 #include <WxDockUI/FrameDockManager.h>
 
 
@@ -32,7 +32,7 @@ namespace WxDockUI::Internal
 
 
 
-	void PaneDragController::beginDrag(Layout::PaneNode * aPane, const wxPoint & aScreenPos)
+	void PaneDragController::beginDrag(const Layout::PaneNode * aPane, const wxPoint & aScreenPos)
 	{
 		if (aPane == nullptr)
 		{
@@ -48,7 +48,7 @@ namespace WxDockUI::Internal
 
 
 
-	void PaneDragController::updateDrag(Layout::PaneNode * aPane, const wxPoint & aScreenPos)
+	void PaneDragController::updateDrag(const Layout::PaneNode * aPane, const wxPoint & aScreenPos)
 	{
 		if (!isDragging())
 		{
@@ -79,7 +79,7 @@ namespace WxDockUI::Internal
 
 
 
-	void PaneDragController::endDrag(Layout::PaneNode * aPane, const wxPoint & aScreenPos)
+	void PaneDragController::endDrag(const Layout::PaneNode * aPane, const wxPoint & aScreenPos)
 	{
 		if (!isDragging())
 		{
@@ -91,6 +91,8 @@ namespace WxDockUI::Internal
 
 		if (mCurrentTarget.has_value())
 		{
+			// Hide the overlay early so that it doesn't cover the debugger:
+			mFrameDockManager.dockOverlay().showOverlay(false);
 			mFrameDockManager.performDock(*mDraggedPane, mCurrentTarget.value());
 		}
 
@@ -101,7 +103,7 @@ namespace WxDockUI::Internal
 
 
 
-	void PaneDragController::cancelDrag(Layout::PaneNode * aPane)
+	void PaneDragController::cancelDrag(const Layout::PaneNode * aPane)
 	{
 		if (!isDragging())
 		{
@@ -135,8 +137,9 @@ namespace WxDockUI::Internal
 		{
 			if (mDragGhost == nullptr)
 			{
-				mDragGhost = new Internal::GhostFrame(mFrameDockManager.frame());
+				mDragGhost = new Internal::DragGhost();
 				mDragGhost->Show();
+				mDragGhost->Raise();
 			}
 			moveDragGhostToTarget(aScreenPos);
 			mFrameDockManager.dockOverlay().updateMousePosition(aScreenPos);

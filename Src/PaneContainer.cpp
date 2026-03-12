@@ -93,7 +93,7 @@ namespace WxDockUI::Internal
 
 	PaneContainer::PaneContainer(
 		FrameDockManager & aManager,
-		Layout::PaneNode & aPaneNode,
+		const Layout::PaneNode & aPaneNode,
 		wxWindow * aParent,
 		wxWindow * aClientWindow,
 		const wxString & aCaption
@@ -103,6 +103,9 @@ namespace WxDockUI::Internal
 		mPaneNode(aPaneNode),
 		mClientWindow(aClientWindow)
 	{
+		#ifndef NDEBUG
+			std::cout << "Creating a PaneContainer for pane " << aPaneNode.paneId() << std::endl;
+		#endif
 		auto * rootSizer = new wxBoxSizer(wxVERTICAL);
 		mCaptionBar = new wxPanel(this);
 		mCaptionBar->SetMinSize(wxSize(-1, 22));
@@ -124,6 +127,17 @@ namespace WxDockUI::Internal
 		SetSizer(rootSizer);
 		Bind(wxEVT_MOTION,  &PaneContainer::onMouseMotion, this);
 		Bind(wxEVT_LEFT_UP, &PaneContainer::onMouseLeftUp, this);
+	}
+
+
+
+
+
+	PaneContainer::~PaneContainer()
+	{
+		#ifndef NDEBUG
+			std::cout << "Deleting a PaneContainer for pane " << mPaneNode.paneId() << std::endl;
+		#endif
 	}
 
 

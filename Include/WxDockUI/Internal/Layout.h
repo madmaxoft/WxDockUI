@@ -78,7 +78,8 @@ namespace WxDockUI::Layout
 		BaseNode * parent() const { return mParent; }
 		void setParent(BaseNode * aParent);
 
-		/** Dumps the node and its children to the specified ostream with the specified base indent. */
+		/** Dumps the node and its children to the specified ostream with the specified base indent.
+		Note that the format is directly usable to build a layout tree in a test in LayoutOpsTest.cpp. */
 		virtual void dump(std::ostream & aOut, int aIndent) const = 0;
 
 		/** Returns this if this is a RootNode instance, otherwise returns nullptr. */
@@ -260,6 +261,11 @@ namespace WxDockUI::Layout
 
 		/** Replaces the current child with the specified one, returning the previous child. */
 		std::unique_ptr<BaseNode> setChild(std::unique_ptr<BaseNode> aChild);
+
+		/** Returns the node specified by its successive indices in the children splits.
+		Eg. {0, 1} specifies "take the second child of the first child of the root split.
+		Returns nullptr if the lookup fails at any point. */
+		BaseNode * walkSplits(const std::vector<size_t> & aSplitIndices);
 
 		// BaseNode override:
 		virtual void dump(std::ostream & aOut, int aIndent) const override;

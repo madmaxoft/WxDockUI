@@ -176,7 +176,7 @@ namespace WxDockUI::Layout
 	void PaneNode::dump(std::ostream & aOut, int aIndent) const
 	{
 		indent(aOut, aIndent);
-		aOut << "PaneNode (" << mPaneId << ")" << "\n";
+		aOut << "Pane(\"" << mPaneId << "\")";
 	}
 
 
@@ -305,12 +305,15 @@ namespace WxDockUI::Layout
 	void TabNode::dump(std::ostream & aOut, int aIndent) const
 	{
 		indent(aOut, aIndent);
-		aOut << "TabNode (" << mPanes.size() << " panes)\n";
+		aOut << "Tab({  // " << mPanes.size() << " panes\n";
 
 		for (const auto & pane: mPanes)
 		{
-			pane->dump(aOut, aIndent + 1);
+			indent(aOut, aIndent + 1);
+			aOut << "\"" << pane->paneId() << "\",\n";
 		}
+		indent(aOut, aIndent);
+		aOut << "})";
 	}
 
 
@@ -423,14 +426,16 @@ namespace WxDockUI::Layout
 	{
 		indent(aOut, aIndent);
 
-		aOut << "SplitNode ";
-		aOut << ((mOrientation == SplitOrientation::Horizontal) ? "Horizontal" : "Vertical");
-		aOut << " (" << mChildren.size() << " children)\n";
+		aOut << ((mOrientation == SplitOrientation::Horizontal) ? "HorzSplit" : "VertSplit");
+		aOut << "({  // " << mChildren.size() << " children\n";
 
 		for (const auto & ch: mChildren)
 		{
 			ch.mNode->dump(aOut, aIndent + 1);
+			aOut << ",\n";
 		}
+		indent(aOut, aIndent);
+		aOut << "})";
 	}
 
 
@@ -468,15 +473,39 @@ namespace WxDockUI::Layout
 
 
 
+	BaseNode * RootNode::walkSplits(const std::vector<size_t> & aSplitIndices)
+	{
+		BaseNode * res = mChild.get();
+		for (const auto & idx: aSplitIndices)
+		{
+			auto split = res->asSplitNode();
+			if (split == nullptr)
+			{
+				return nullptr;
+			}
+			res = split->child(idx);
+		}
+		return res;
+	}
+
+
+
+
+
 	void RootNode::dump(std::ostream & aOut, int aIndent) const
 	{
 		if (mChild == nullptr)
 		{
 			indent(aOut, aIndent);
-			aOut << "(null root child)\n";
+			aOut << "Root()\n";
 			return;
 		}
+		indent(aOut, aIndent);
+		aOut << "Root(\n";
 		mChild->dump(aOut, aIndent + 1);
+		aOut << "\n";
+		indent(aOut, aIndent);
+		aOut << ");\n";
 	}
 
 
