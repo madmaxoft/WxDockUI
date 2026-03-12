@@ -255,8 +255,8 @@ namespace WxDockUI::Internal
 
 		// First time seeing this pane, create a new panel for it and reparent the pane contents into it:
 		tab.mPanel.reset(new wxPanel(mNotebook));
-		auto * window = mFrameDockManager.layoutEngine().ensurePaneContainer(aPaneNode);
-		if (window == nullptr)
+		auto * pc = mFrameDockManager.layoutEngine().ensurePaneContainer(aPaneNode);
+		if (pc == nullptr)
 		{
 			assert(!"Unknown pane container");
 			throw std::runtime_error("Unknown pane container");
@@ -267,14 +267,15 @@ namespace WxDockUI::Internal
 			throw std::runtime_error("Unknown paneInfo for a known pane");
 		}
 		tab.mCaption = paneInfo->caption();
-		auto oldSizer = window->GetContainingSizer();
+		auto oldSizer = pc->GetContainingSizer();
 		if (oldSizer != nullptr)
 		{
-			oldSizer->Detach(window);
+			oldSizer->Detach(pc);
 		}
-		window->Reparent(tab.mPanel.get());
+		pc->Reparent(tab.mPanel.get());
+		pc->showCaptionBar(false);
 		tab.mSizer = new wxBoxSizer(wxVERTICAL);
-		tab.mSizer->Add(window, 1, wxEXPAND);
+		tab.mSizer->Add(pc, 1, wxEXPAND);
 		tab.mPanel->SetSizer(tab.mSizer);
 		return tab;
 	}

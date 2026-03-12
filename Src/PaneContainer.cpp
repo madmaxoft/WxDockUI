@@ -145,4 +145,12 @@ namespace WxDockUI::Internal
 
 
 
+	void PaneContainer::showCaptionBar(bool aShouldShow)
+	{
+		mCaptionBar->Show(aShouldShow);
+	}
+
+
+
+
 }  // namespace WxDockUI::Internal

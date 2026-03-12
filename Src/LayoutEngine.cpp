@@ -93,6 +93,7 @@ namespace WxDockUI::Layout
 			return;
 		}
 		container->Reparent(aParent);
+		container->showCaptionBar(true);
 		container->SetSize(aRect);
 		container->Show();
 	}

@@ -80,6 +80,9 @@ namespace WxDockUI::Internal
 		// Getters:
 		wxWindow * clientWindow() const { return mClientWindow; }
 		const Layout::PaneNode & paneNode() const { return mPaneNode; }
+
+		/** Sets whether mCaptionBar should be shown in the container. */
+		void showCaptionBar(bool aShouldShow);
 	};
 
 
