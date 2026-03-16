@@ -171,9 +171,6 @@ namespace WxDockUI::Layout
 	PaneNode::PaneNode(const std::string & aPaneId):
 		PaneNode(aPaneId, WxDockUI::DockPosition::Floating)
 	{
-		#ifdef WXDOCKUI_DEBUG_LIFETIME
-			std::cout << "Created a PaneNode at " << this << ", id " << mPaneId << std::endl;
-		#endif
 	}
 
 

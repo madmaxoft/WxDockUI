@@ -1,6 +1,7 @@
 #include <WxDockUI/Internal/LayoutEngine.h>
 #include <WxDockUI/Internal/Layout.h>
 #include <WxDockUI/Internal/PaneContainer.h>
+#include <WxDockUI/Internal/SplitContainer.h>
 #include <WxDockUI/Internal/TabContainer.h>
 #include <WxDockUI/FrameDockManager.h>
 
@@ -10,6 +11,30 @@
 
 namespace WxDockUI::Layout
 {
+
+
+
+
+
+	/** Removes those elements from aMap whose key is not in aSet. */
+	template <typename KeyType, typename ValueType>
+	void removeFromMapThoseNotInSet(std::unordered_map<KeyType, ValueType> & aMap, const std::unordered_set<KeyType> & aSet)
+	{
+		for (auto itr = aMap.begin(); itr != aMap.end(); )
+		{
+			if (aSet.find(itr->first) == aSet.end())
+			{
+				#ifdef WXDOCKUI_DEBUG_LIFETIME
+					std::cout << "Pruning container at " << itr->second << "." << std::endl;
+				#endif
+				itr = aMap.erase(itr);
+			}
+			else
+			{
+				++itr;
+			}
+		}
+	}
 
 
 
@@ -45,34 +70,19 @@ namespace WxDockUI::Layout
 		const wxRect & aRect
 	)
 	{
-		float totalRatio = 0.0f;
-		for (const auto & child: aNode.children())
+		auto container = ensureSplitContainer(aNode);
+		if (container == nullptr)
 		{
-			totalRatio += child.mRatio;
+			assert(!"Failed to create a split container");
+			return;
 		}
-
-		int offset = 0;
-		for (const auto & child : aNode.children())
+		if (container->GetParent() != aParent)
 		{
-			float fraction = child.mRatio / totalRatio;
-			wxRect childRect = aRect;
-			if (aNode.orientation() == SplitOrientation::Horizontal)
-			{
-				int width = int(aRect.width * fraction);
-				childRect.x += offset;
-				childRect.width = width;
-				offset += width;
-			}
-			else
-			{
-				int height = int(aRect.height * fraction);
-				childRect.y += offset;
-				childRect.height = height;
-				offset += height;
-			}
-
-			layoutNode(*child.mNode, aParent, childRect);
+			container->Reparent(aParent);
 		}
+		container->SetSize(aRect);
+		container->updateLayout();
+		container->Show();
 	}
 
 
@@ -127,9 +137,91 @@ namespace WxDockUI::Layout
 
 
 
+	void LayoutEngine::collectNodes(
+		const BaseNode & aNode,
+		std::unordered_set<const PaneNode *> & aOutPaneNodes,
+		std::unordered_set<const TabNode *> & aOutTabNodes,
+		std::unordered_set<const SplitNode *> & aOutSplitNodes
+	)
+	{
+		switch (aNode.type())
+		{
+			case NodeType::Root:
+			{
+				collectNodes(*(aNode.asRootNode()->child()), aOutPaneNodes, aOutTabNodes, aOutSplitNodes);
+				return;
+			}
+			case NodeType::Pane:
+			{
+				aOutPaneNodes.insert(aNode.asPaneNode());
+				return;
+			}
+			case NodeType::Tab:
+			{
+				aOutTabNodes.insert(aNode.asTabNode());
+				for (const auto & pane: aNode.asTabNode()->panes())
+				{
+					aOutPaneNodes.insert(pane.get());
+				}
+				return;
+			}
+			case NodeType::Split:
+			{
+				aOutSplitNodes.insert(aNode.asSplitNode());
+				for (const auto & ch: aNode.asSplitNode()->children())
+				{
+					collectNodes(*ch.mNode, aOutPaneNodes, aOutTabNodes, aOutSplitNodes);
+				}
+				return;
+			}
+		}
+		assert(!"Unknown node type");
+	}
+
+
+
+
+
+	void LayoutEngine::pruneContainers(const RootNode & aRoot)
+	{
+		#ifdef WXDOCKUI_DEBUG_LIFETIME
+			std::cout << "Pruning containers for the LayoutEngine at " << this << "." << std::endl;
+		#endif
+
+		// Collect all nodes currently in the root:
+		std::unordered_set<const PaneNode *> paneNodes;
+		std::unordered_set<const TabNode *> tabNodes;
+		std::unordered_set<const SplitNode *> splitNodes;
+		collectNodes(aRoot, paneNodes, tabNodes, splitNodes);
+
+		removeFromMapThoseNotInSet(mPaneContainers,  paneNodes);
+		removeFromMapThoseNotInSet(mTabContainers,   tabNodes);
+		removeFromMapThoseNotInSet(mSplitContainers, splitNodes);
+	}
+
+
+
+
+
 	LayoutEngine::LayoutEngine(WxDockUI::FrameDockManager & aFrameDockManager):
 		mFrameDockManager(aFrameDockManager)
 	{
+		#ifdef WXDOCKUI_DEBUG_LIFETIME
+			std::cout << "Created a LayoutEngine at " << this << "." << std::endl;
+		#endif
+	}
+
+
+
+
+
+	LayoutEngine::~LayoutEngine()
+	{
+		// Nothing explicit needed yet
+		// The destructor must be defined in cpp file otherwise clients would need to include all XContainer classes.
+		#ifdef WXDOCKUI_DEBUG_LIFETIME
+			std::cout << "Deleting LayoutEngine at " << this << "." << std::endl;
+		#endif
 	}
 
 
@@ -147,6 +239,7 @@ namespace WxDockUI::Layout
 			return;
 		}
 
+		pruneContainers(aRoot);
 		layoutNode(*aRoot.child(), aParent, aRect);
 	}
 
@@ -156,6 +249,15 @@ namespace WxDockUI::Layout
 
 	void LayoutEngine::clear()
 	{
+		#ifdef WXDOCKUI_DEBUG_LIFETIME
+			std::cout << "Clearing LayoutEngine at " << this << "." << std::endl;
+		#endif
+
+		for (auto & sc: mSplitContainers)
+		{
+			sc.second->clear();
+		}
+		mSplitContainers.clear();
 		mPaneContainers.clear();
 		mTabContainers.clear();
 	}
@@ -237,6 +339,25 @@ namespace WxDockUI::Layout
 			return itr->second.get();
 		}
 		return nullptr;
+	}
+
+
+
+
+
+	Internal::SplitContainer * LayoutEngine::ensureSplitContainer(SplitNode & aSplitNode)
+	{
+		auto itr = mSplitContainers.find(&aSplitNode);
+		if (itr != mSplitContainers.end())
+		{
+			return itr->second.get();
+		}
+
+		// Not found, create a new one:
+		auto tc = std::make_unique<Internal::SplitContainer>(mFrameDockManager, mFrameDockManager.frame(), aSplitNode);
+		auto * raw = tc.get();
+		mSplitContainers.emplace(&aSplitNode, std::move(tc));
+		return raw;
 	}
 
 

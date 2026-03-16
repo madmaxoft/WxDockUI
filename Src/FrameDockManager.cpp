@@ -1,7 +1,5 @@
 #include <WxDockUI/FrameDockManager.h>
 #include <WxDockUI/DockSystem.h>
-#include <WxDockUI/Internal/PaneContainer.h>
-#include <WxDockUI/Internal/TabContainer.h>
 #include <WxDockUI/Internal/LayoutOps.h>
 
 

@@ -16,6 +16,7 @@ set(srcs
 	Src/LayoutOps.cpp
 	Src/PaneContainer.cpp
 	Src/PaneDragController.cpp
+	Src/SplitContainer.cpp
 	Src/TabContainer.cpp
 )
 
@@ -35,6 +36,7 @@ set(hdrs
 	Include/WxDockUI/Internal/LayoutOps.h
 	Include/WxDockUI/Internal/PaneContainer.h
 	Include/WxDockUI/Internal/PaneDragController.h
+	Include/WxDockUI/Internal/SplitContainer.h
 	Include/WxDockUI/Internal/TabContainer.h
 )
 

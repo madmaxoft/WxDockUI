@@ -104,7 +104,7 @@ namespace WxDockUI::Internal
 		mClientWindow(aClientWindow)
 	{
 		#ifdef WXDOCKUI_DEBUG_LIFETIME
-			std::cout << "Creating a PaneContainer at " << this << " for pane " << aPaneNode.paneId() << "." << std::endl;
+			std::cout << "Created a PaneContainer at " << this << " for pane " << aPaneNode.paneId() << "." << std::endl;
 		#endif
 		auto * rootSizer = new wxBoxSizer(wxVERTICAL);
 		mCaptionBar = new wxPanel(this);

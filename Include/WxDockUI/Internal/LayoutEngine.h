@@ -1,6 +1,7 @@
 #pragma once
 
 #include <unordered_map>
+#include <unordered_set>
 #include <memory>
 
 #include <wx/window.h>
@@ -16,6 +17,7 @@ namespace WxDockUI
 	namespace Internal
 	{
 		class PaneContainer;
+		class SplitContainer;
 		class TabContainer;
 	}
 	namespace Layout
@@ -44,6 +46,9 @@ namespace WxDockUI::Layout
 	Since it knows about all the geometry, it also performs hit-testing */
 	class LayoutEngine
 	{
+		friend class WxDockUI::Internal::SplitContainer;
+
+
 		/** The FrameDockManager responsible for handling all the PaneContainers created by this class. */
 		WxDockUI::FrameDockManager & mFrameDockManager;
 
@@ -51,7 +56,10 @@ namespace WxDockUI::Layout
 		std::unordered_map<const PaneNode *, std::unique_ptr<Internal::PaneContainer>> mPaneContainers;
 
 		/** Mapping of layout TabNodes to the TabContainer instances representing them. */
-		std::unordered_map<Layout::TabNode *, std::unique_ptr<WxDockUI::Internal::TabContainer>> mTabContainers;
+		std::unordered_map<const Layout::TabNode *, std::unique_ptr<WxDockUI::Internal::TabContainer>> mTabContainers;
+
+		/** Mapping of layout SplitNodes to the SplitContainer instances representing them. */
+		std::unordered_map<const Layout::SplitNode *, std::unique_ptr<WxDockUI::Internal::SplitContainer>> mSplitContainers;
 
 
 
@@ -79,11 +87,26 @@ namespace WxDockUI::Layout
 			const wxRect & aRect
 		);
 
+		/** Recursively collects all pane nodes, tab nodes and split nodes within the specified
+		node into the appropriate sets. */
+		void collectNodes(const BaseNode & aNode,
+			std::unordered_set<const PaneNode *> & aOutPaneNodes,
+			std::unordered_set<const TabNode *> & aOutTabNodes,
+			std::unordered_set<const SplitNode *> & aOutSplitNodes
+		);
+
+		/** Removes SplitContainers, TabContainers and PaneContainers that no longer have a corresponding
+		layout node within the specified root. */
+		void pruneContainers(const RootNode & aRoot);
+
 
 	public:
 
 		/** Creates a new instance bound to the specified FraomeDockManager. */
 		explicit LayoutEngine(WxDockUI::FrameDockManager & aFrameDockManager);
+
+		/** Destroys the instance. */
+		~LayoutEngine();
 
 		/** Applies the layout from the root node into the specified window and rectangle. */
 		void applyLayout(
@@ -110,6 +133,10 @@ namespace WxDockUI::Layout
 		/** Internal: Returns the PaneContainer representing the specified layout pane node.
 		If no such container exists, returns nullptr. */
 		Internal::PaneContainer * maybePaneContainer(const PaneNode & aPaneNode);
+
+		/** Internal: Returns the SplitContainer representing the specified layout split node.
+		If no such container exists, creates a new one and remembers it in mSplitContainers. */
+		Internal::SplitContainer * ensureSplitContainer(SplitNode & aSplitNode);
 	};
 
 
