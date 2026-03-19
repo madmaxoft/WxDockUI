@@ -46,6 +46,21 @@ namespace WxDockUI::Internal
 		/** The layout node this container reflects. */
 		Layout::SplitNode & mSplitNode;
 
+		/** The rectangles representing the splitters between the children.
+		Splitter n is in between child n and n + 1. */
+		std::vector<wxRect> mSplitterRects;
+
+		/** Sizes of individual children, in pixels.
+		Converted from SplitNode ratios upon layouting.
+		Adjusted by the user dragging in onSplitterMouseMove. */
+		std::vector<int> mSplitterPixelSizes;
+
+		/** The index of the spliter currently being dragged. -1 if not dragging anything. */
+		int mDragSplitter = -1;
+
+
+		/** Updates the mSplitterPixelSizes based on the current split children and ratios. */
+		void recalculatePixelSizes();
 
 		/** Called by WX when the user presses left-click on mNotebook. */
 		void onSplitterLeftDown(wxMouseEvent & aEvent);
@@ -55,6 +70,9 @@ namespace WxDockUI::Internal
 
 		/** Called by WX when the user releases left-click on mNotebook. */
 		void onSplitterLeftUp(wxMouseEvent & aEvent);
+
+		/** Called by WX to draw the contents. Draws the splitter handles. */
+		void onPaint(wxPaintEvent & aEvent);
 
 
 	public:
