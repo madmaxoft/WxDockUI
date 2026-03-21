@@ -46,6 +46,9 @@ namespace WxDockUI::Layout
 		const wxRect & aRect
 	)
 	{
+		assert(aRect.width > 0);
+		assert(aRect.height > 0);
+
 		switch (aNode.type())
 		{
 			case NodeType::Split: return layoutSplitNode(static_cast<SplitNode &>(aNode), aParent, aRect);
@@ -102,7 +105,10 @@ namespace WxDockUI::Layout
 			assert(!"Failed to create a pane container");
 			return;
 		}
-		container->Reparent(aParent);
+		if (container->GetParent() != aParent)
+		{
+			container->Reparent(aParent);
+		}
 		container->showCaptionBar(true);
 		container->SetSize(aRect);
 		container->Show();

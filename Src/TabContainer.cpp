@@ -272,7 +272,10 @@ namespace WxDockUI::Internal
 		{
 			oldSizer->Detach(pc);
 		}
-		pc->Reparent(tab.mPanel.get());
+		if (pc->GetParent() != tab.mPanel.get())
+		{
+			pc->Reparent(tab.mPanel.get());
+		}
 		pc->showCaptionBar(false);
 		tab.mSizer = new wxBoxSizer(wxVERTICAL);
 		tab.mSizer->Add(pc, 1, wxEXPAND);

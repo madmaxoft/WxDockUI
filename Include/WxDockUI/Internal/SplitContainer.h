@@ -37,9 +37,6 @@ namespace WxDockUI::Internal
 		using Super = wxPanel;
 
 
-		/** The movement threshold before a spliter-drag operation is started. */
-		static constexpr int DRAG_THRESHOLD_PIXELS = 5;
-
 		/** The manager responsible for creating and storing housekeeping UI elements. */
 		FrameDockManager & mFrameDockManager;
 
@@ -56,20 +53,28 @@ namespace WxDockUI::Internal
 		std::vector<int> mSplitterPixelSizes;
 
 		/** The index of the spliter currently being dragged. -1 if not dragging anything. */
-		int mDragSplitter = -1;
+		int mDraggedSplitter = -1;
 
 
 		/** Updates the mSplitterPixelSizes based on the current split children and ratios. */
 		void recalculatePixelSizes();
 
-		/** Called by WX when the user presses left-click on mNotebook. */
-		void onSplitterLeftDown(wxMouseEvent & aEvent);
+		/** Applies the current mouse position in the relevant direction into the position
+		of the splitter being currently dragged.
+		Updates the mSplitterPixelSizes[] for both sides of the splitter being dragged, as well as mSplitterRects[]. */
+		void applyDraggedSplitterPos(int aMousePos);
 
-		/** Called by WX when the user drags the mouse on mNotebook. */
-		void onSplitterMouseMove(wxMouseEvent & aEvent);
+		/** Called by WX when the user presses left-click on the widget. */
+		void onSplitterMouseLeftDown(wxMouseEvent & aEvent);
 
-		/** Called by WX when the user releases left-click on mNotebook. */
-		void onSplitterLeftUp(wxMouseEvent & aEvent);
+		/** Called by WX when the user drags the mouse over the widget. */
+		void onSplitterMouseMotion(wxMouseEvent & aEvent);
+
+		/** Called by WX when the user releases left-click on the widget. */
+		void onSplitterMouseLeftUp(wxMouseEvent & aEvent);
+
+		/** Called by WX when the mouse capture is lost while the widget had it captured. */
+		void onSplitterMouseCaptureLost(wxMouseCaptureLostEvent & aEvent);
 
 		/** Called by WX to draw the contents. Draws the splitter handles. */
 		void onPaint(wxPaintEvent & aEvent);

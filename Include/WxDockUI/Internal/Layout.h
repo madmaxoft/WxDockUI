@@ -237,6 +237,7 @@ namespace WxDockUI::Layout
 
 		// Getters:
 		const std::vector<SplitChild> & children() const { return mChildren; }
+		std::vector<SplitChild> & children() { return mChildren; }
 		BaseNode * child(size_t aIndex) const { return mChildren[aIndex].mNode.get(); }
 		SplitOrientation orientation() const { return mOrientation; }
 

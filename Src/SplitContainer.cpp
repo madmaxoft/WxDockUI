@@ -15,6 +15,11 @@ namespace WxDockUI::Internal
 
 
 
+	using namespace WxDockUI::Layout;
+
+
+
+
 
 	static constexpr int SPLITTER_SIZE = 6;
 
@@ -35,8 +40,14 @@ namespace WxDockUI::Internal
 			std::cout << "Created a SplitContainer at " << this << " with " << aSplitNode.children().size() << " children." << std::endl;
 		#endif
 
-		Bind(wxEVT_PAINT, &SplitContainer::onPaint, this);
 		SetBackgroundStyle(wxBG_STYLE_PAINT);
+		SetCursor((aSplitNode.orientation() == SplitOrientation::Horizontal) ? wxCURSOR_SIZEWE : wxCURSOR_SIZENS);
+
+		Bind(wxEVT_PAINT, &SplitContainer::onPaint, this);
+		Bind(wxEVT_LEFT_DOWN,          &SplitContainer::onSplitterMouseLeftDown, this);
+		Bind(wxEVT_MOTION,             &SplitContainer::onSplitterMouseMotion, this);
+		Bind(wxEVT_LEFT_UP,            &SplitContainer::onSplitterMouseLeftUp, this);
+		Bind(wxEVT_MOUSE_CAPTURE_LOST, &SplitContainer::onSplitterMouseCaptureLost, this);
 	}
 
 
@@ -74,7 +85,7 @@ namespace WxDockUI::Internal
 		{
 			float fraction = child.mRatio / totalRatio;
 			wxRect childRect = rect;
-			if (mSplitNode.orientation() == WxDockUI::Layout::SplitOrientation::Horizontal)
+			if (mSplitNode.orientation() == SplitOrientation::Horizontal)
 			{
 				auto width = static_cast<int>(totalWidth * fraction);
 				mSplitterPixelSizes.push_back(width);
@@ -95,38 +106,102 @@ namespace WxDockUI::Internal
 
 
 
-	void SplitContainer::onSplitterLeftDown(wxMouseEvent & aEvent)
+	void SplitContainer::onSplitterMouseLeftDown(wxMouseEvent & aEvent)
 	{
-		/*
+		// Find which splitter, if any, is being dragged:
 		auto pos = aEvent.GetPosition();
 		for (size_t i = 0; i < mSplitterRects.size(); ++i)
 		{
-			if (mSplitterRects[i].Contains(pos))
+			if (!mSplitterRects[i].Contains(pos))
 			{
-				mDraggingSplitter = static_cast<int>(i);
-				if (mOrientation == Orientation::Horizontal)
-				{
-					mDragStartPos = pos.x;
-				}
-				else
-				{
-					mDragStartPos = pos.y;
-				}
-
-				auto & childA = mChildren[i];
-				auto & childB = mChildren[i + 1];
-
-				wxRect rectA = childA->GetRect();
-				wxRect rectB = childB->GetRect();
-
-				mDragStartSizeA = (mOrientation == Orientation::Horizontal) ? rectA.width  : rectA.height;
-				mDragStartSizeB = (mOrientation == Orientation::Horizontal) ? rectB.width  : rectB.height;
-
-				CaptureMouse();
-				return;
+				continue;
 			}
+			mDraggedSplitter = static_cast<int>(i);
+			CaptureMouse();
+			return;
 		}
-		*/
+	}
+
+
+
+
+
+	void SplitContainer::onSplitterMouseMotion(wxMouseEvent & aEvent)
+	{
+		if (mDraggedSplitter < 0)
+		{
+			aEvent.Skip();
+			return;
+		}
+		assert(mDraggedSplitter < mSplitterPixelSizes.size() - 1);
+		assert(mDraggedSplitter < mSplitterRects.size() - 1);
+
+		// Clamp the pos between the two neighboring splitters:
+		auto pos = aEvent.GetPosition();
+		auto mousePos = (mSplitNode.orientation() == SplitOrientation::Horizontal) ? pos.x : pos.y;
+		int minPos = 0;
+		for (int idx = 0; idx < mDraggedSplitter; ++idx)
+		{
+			minPos += mSplitterPixelSizes[idx];
+		}
+		auto maxPos = minPos + mSplitterPixelSizes[mDraggedSplitter] + mSplitterPixelSizes[mDraggedSplitter + 1];
+		if (mousePos <= minPos)
+		{
+			mousePos = minPos + 1;
+		}
+		if (mousePos >= maxPos)
+		{
+			mousePos = maxPos - 1;
+		}
+
+		// Apply into the pixel sizes and rects:
+		mSplitterPixelSizes[mDraggedSplitter] = mousePos - minPos;
+		mSplitterPixelSizes[mDraggedSplitter + 1] = maxPos - mousePos;
+		if (mSplitNode.orientation() == SplitOrientation::Horizontal)
+		{
+			mSplitterRects[mDraggedSplitter].SetLeft(mousePos);
+		}
+		else
+		{
+			mSplitterRects[mDraggedSplitter].SetTop(mousePos);
+		}
+		updateLayout();
+		aEvent.Skip();
+	}
+
+
+
+
+
+	void SplitContainer::onSplitterMouseLeftUp(wxMouseEvent & aEvent)
+	{
+		// Finalize any outstanding motion:
+		onSplitterMouseMotion(aEvent);
+
+		if (HasCapture())
+		{
+			ReleaseMouse();
+		}
+
+		mDraggedSplitter = -1;
+
+		// Apply the pixel sizes back into split ratios:
+		size_t idx = 0;
+		for (auto & ch: mSplitNode.children())
+		{
+			ch.mRatio = mSplitterPixelSizes[idx++];
+		}
+
+		aEvent.Skip();
+	}
+
+
+
+
+
+	void SplitContainer::onSplitterMouseCaptureLost(wxMouseCaptureLostEvent & aEvent)
+	{
+		mDraggedSplitter = -1;
 	}
 
 
@@ -173,7 +248,7 @@ namespace WxDockUI::Internal
 	void SplitContainer::updateLayout()
 	{
 		// If not dragging, update the pixel sizes from ratios:
-		if (mDragSplitter < 0)
+		if (mDraggedSplitter < 0)
 		{
 			recalculatePixelSizes();
 		}
@@ -187,7 +262,7 @@ namespace WxDockUI::Internal
 		for (const auto & child: mSplitNode.children())
 		{
 			wxRect childRect = rect;
-			if (mSplitNode.orientation() == WxDockUI::Layout::SplitOrientation::Horizontal)
+			if (mSplitNode.orientation() == SplitOrientation::Horizontal)
 			{
 				int width = mSplitterPixelSizes[idx];
 				childRect.x += offset;
@@ -201,7 +276,10 @@ namespace WxDockUI::Internal
 				childRect.height = height;
 				offset += height + SPLITTER_SIZE;
 			}
+			assert(childRect.width > 0);
+			assert(childRect.height > 0);
 			mFrameDockManager.layoutEngine().layoutNode(*child.mNode, this, childRect);
+			++idx;
 		}
 	}
 
