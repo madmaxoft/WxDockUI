@@ -14,6 +14,11 @@ namespace WxDockUI::Internal
 
 
 
+	using namespace WxDockUI;
+
+
+
+
 
 	DockOverlay::DockOverlay(FrameDockManager & aFrameDockManager):
 		Super(
@@ -188,8 +193,11 @@ namespace WxDockUI::Internal
 		const wxRect r = mHoveredPaneRectScreen;
 		const int pcx = r.x + r.width / 2;
 		const int pcy = r.y + r.height / 2;
-		mIconRects[DockTarget::Kind::PaneTab]         = wxRect(pcx - ICON_SIZE / 2, pcy - ICON_SIZE / 2, ICON_SIZE, ICON_SIZE);
-		if (mHoveredPane != mCurrentDragNode)
+		mIconRects[DockTarget::Kind::PaneTab] = wxRect(pcx - ICON_SIZE / 2, pcy - ICON_SIZE / 2, ICON_SIZE, ICON_SIZE);
+		if (
+			(mHoveredPane != mCurrentDragNode) ||  // Dragging into another pane
+			(mHoveredPane->parent()->type() == Layout::NodeType::Tab)  // Dragging into self, but self is within a tab node
+		)
 		{
 			mIconRects[DockTarget::Kind::PaneSplitLeft]   = wxRect(pcx - 3 * ICON_SIZE / 2 - ICON_SPACING, pcy - ICON_SIZE / 2, ICON_SIZE, ICON_SIZE);
 			mIconRects[DockTarget::Kind::PaneSplitRight]  = wxRect(pcx + ICON_SIZE / 2 + ICON_SPACING, pcy - ICON_SIZE / 2, ICON_SIZE, ICON_SIZE);
