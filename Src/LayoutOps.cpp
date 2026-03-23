@@ -687,6 +687,12 @@ namespace WxDockUI::Layout::Ops
 		auto targetTab = wrapPaneInTab(aRoot, aTargetPaneId);
 		assert(targetTab != nullptr);
 
+		// Copy the intended dock pos from the target pane
+		assert(targetTab->panes().size() >= 1);
+		auto targetPane = targetTab->pane(0);
+		assert(targetPane != nullptr);
+		toMovePane->setIntendedDockPos(targetPane->intendedDockPos());
+
 		targetTab->insertPane(std::move(toMovePane), aInsertIndex);
 		return true;
 	}
