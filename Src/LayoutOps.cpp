@@ -237,72 +237,75 @@ namespace WxDockUI::Layout::Ops
 		}
 
 		auto center = findCenterTarget(*aRoot.child());
-		if (center != nullptr)
+		if (center == nullptr)
 		{
-			// If the center target is already wrapped in a Tab, use the tab as the target:
-			if (center->parent() != nullptr)
+			assert(!"Unable to insert center pane, cannot find a target");
+			return;
+		}
+
+		// If the center target is already wrapped in a Tab, use the tab as the target:
+		if (center->parent() != nullptr)
+		{
+			if (
+				(center->type() == NodeType::Pane) &&
+				(center->parent()->type() == NodeType::Tab)
+			)
 			{
-				if (
-					(center->type() == NodeType::Pane) &&
-					(center->parent()->type() == NodeType::Tab)
-				)
-				{
-					center = center->parent();
-				}
+				center = center->parent();
 			}
+		}
 
-			switch (center->type())
+		switch (center->type())
+		{
+			case NodeType::Pane:
 			{
-				case NodeType::Pane:
+				// Extract the pane from the parent:
+				auto * parent = center->parent();
+				std::unique_ptr<BaseNode> extractedNode;
+				if ((parent == nullptr) || (parent->type() == NodeType::Root))
 				{
-					// Extract the pane from the parent:
-					auto * parent = center->parent();
-					std::unique_ptr<BaseNode> extractedNode;
-					if ((parent == nullptr) || (parent->type() == NodeType::Root))
-					{
-						extractedNode = aRoot.setChild(nullptr);
-					}
-					else if (parent->type() == NodeType::Split)
-					{
-						auto & split = static_cast<SplitNode &>(*parent);
-						extractedNode = split.removeChild(center);
-					}
-					else
-					{
-						assert(!"Pane parent must be Root or Split");  // We checked for Tab above
-					}
-					auto oldPane = std::unique_ptr<PaneNode>(static_cast<PaneNode *>(extractedNode.release()));
+					extractedNode = aRoot.setChild(nullptr);
+				}
+				else if (parent->type() == NodeType::Split)
+				{
+					auto & split = static_cast<SplitNode &>(*parent);
+					extractedNode = split.removeChild(center);
+				}
+				else
+				{
+					assert(!"Pane parent must be Root or Split");  // We checked for Tab above
+				}
+				auto oldPane = std::unique_ptr<PaneNode>(static_cast<PaneNode *>(extractedNode.release()));
 
-					// Insert a tab in place of the original pane:
-					assert(oldPane->intendedDockPos() == DockPosition::Center);
-					aPaneNode->setIntendedDockPos(DockPosition::Center);
-					auto tab = std::make_unique<TabNode>();
-					tab->insertPane(std::move(oldPane), 0);
-					tab->insertPane(std::move(aPaneNode), 1);
-					tab->setActiveIndex(1);
-					if ((parent == nullptr) || (parent->type() == NodeType::Root))
-					{
-						aRoot.setChild(std::move(tab));
-					}
-					else
-					{
-						auto & split = static_cast<SplitNode &>(*parent);
-						split.insertChild(std::move(tab), 1.0f, 0);
-					}
-					return;
-				}
-				case NodeType::Tab:
+				// Insert a tab in place of the original pane:
+				assert(oldPane->intendedDockPos() == DockPosition::Center);
+				aPaneNode->setIntendedDockPos(DockPosition::Center);
+				auto tab = std::make_unique<TabNode>();
+				tab->insertPane(std::move(oldPane), 0);
+				tab->insertPane(std::move(aPaneNode), 1);
+				tab->setActiveIndex(1);
+				if ((parent == nullptr) || (parent->type() == NodeType::Root))
 				{
-					aPaneNode->setIntendedDockPos(DockPosition::Center);
-					auto tab = center->asTabNode();
-					tab->insertPane(std::move(aPaneNode), tab->panes().size());
-					tab->setActiveIndex(tab->panes().size() - 1);
-					return;
+					aRoot.setChild(std::move(tab));
 				}
-				default:
+				else
 				{
-					assert(!"Unknown center node type");
+					auto & split = static_cast<SplitNode &>(*parent);
+					split.insertChild(std::move(tab), 1.0f, 0);
 				}
+				return;
+			}
+			case NodeType::Tab:
+			{
+				aPaneNode->setIntendedDockPos(DockPosition::Center);
+				auto tab = center->asTabNode();
+				tab->insertPane(std::move(aPaneNode), tab->panes().size());
+				tab->setActiveIndex(tab->panes().size() - 1);
+				return;
+			}
+			default:
+			{
+				assert(!"Unknown center node type");
 			}
 		}
 	}
@@ -342,7 +345,7 @@ namespace WxDockUI::Layout::Ops
 				const size_t index = ((aPosition == DockPosition::Left) || (aPosition == DockPosition::Top))
 					? 0
 					: split->children().size();
-				split->insertChild(std::move(aPaneNode), 1.0f, index);
+				split->insertChild(std::move(aPaneNode), split->sumRatios() / 4, index);
 				aRoot.setChild(std::move(oldChild));
 				return;
 			}
@@ -391,11 +394,11 @@ namespace WxDockUI::Layout::Ops
 		if (paneFirst)
 		{
 			split->insertChild(std::move(aPaneNode), 1.0f, 0);
-			split->insertChild(std::move(oldChild), 1.0f, 1);
+			split->insertChild(std::move(oldChild), 4.0f, 1);
 		}
 		else
 		{
-			split->insertChild(std::move(oldChild), 1.0f, 0);
+			split->insertChild(std::move(oldChild), 4.0f, 0);
 			split->insertChild(std::move(aPaneNode), 1.0f, 1);
 		}
 		aRoot.setChild(std::move(split));

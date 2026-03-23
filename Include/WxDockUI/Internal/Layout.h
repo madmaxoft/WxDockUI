@@ -241,6 +241,9 @@ namespace WxDockUI::Layout
 		BaseNode * child(size_t aIndex) const { return mChildren[aIndex].mNode.get(); }
 		SplitOrientation orientation() const { return mOrientation; }
 
+		/** Returns the sum of all the children's ratios. */
+		float sumRatios() const;
+
 		// BaseNode override:
 		virtual void dump(std::ostream & aOut, int aIndent) const override;
 	};

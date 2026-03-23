@@ -437,6 +437,20 @@ namespace WxDockUI::Layout
 
 
 
+	float SplitNode::sumRatios() const
+	{
+		float total = 0;
+		for (const auto & ch: mChildren)
+		{
+			total += ch.mRatio;
+		}
+		return total;
+	}
+
+
+
+
+
 	void SplitNode::dump(std::ostream & aOut, int aIndent) const
 	{
 		indent(aOut, aIndent);
