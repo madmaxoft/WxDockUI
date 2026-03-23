@@ -239,6 +239,7 @@ namespace WxDockUI::Layout::Ops
 		auto center = findCenterTarget(*aRoot.child());
 		if (center != nullptr)
 		{
+			// If the center target is already wrapped in a Tab, use the tab as the target:
 			if (center->parent() != nullptr)
 			{
 				if (
@@ -249,6 +250,7 @@ namespace WxDockUI::Layout::Ops
 					center = center->parent();
 				}
 			}
+
 			switch (center->type())
 			{
 				case NodeType::Pane:
@@ -271,7 +273,8 @@ namespace WxDockUI::Layout::Ops
 					}
 					auto oldPane = std::unique_ptr<PaneNode>(static_cast<PaneNode *>(extractedNode.release()));
 
-					// Insert a split in place of the original pane:
+					// Insert a tab in place of the original pane:
+					assert(oldPane->intendedDockPos() == DockPosition::Center);
 					aPaneNode->setIntendedDockPos(DockPosition::Center);
 					auto tab = std::make_unique<TabNode>();
 					tab->insertPane(std::move(oldPane), 0);
