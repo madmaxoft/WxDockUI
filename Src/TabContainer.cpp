@@ -91,7 +91,7 @@ namespace WxDockUI::Internal
 		std::unordered_set<const Layout::PaneNode *> usedPanes;
 		for (const auto & paneNode: mTabNode.panes())
 		{
-			auto & tab = tabForPane(*paneNode);
+			auto & tab = ensureTabForPane(*paneNode);
 			tab.mPanel->Show();
 			mNotebook->AddPage(
 				tab.mPanel.get(),  // Borrow the pointer, but will NOT delete it

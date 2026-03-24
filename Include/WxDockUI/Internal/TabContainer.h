@@ -97,7 +97,7 @@ namespace WxDockUI::Internal
 
 		/** Returns the Tab instance representing the specified pane.
 		If no such instance exists, creates it and adds it to mPaneTabs as well. */
-		Tab & tabForPane(const Layout::PaneNode & aPaneNode);
+		Tab & ensureTabForPane(const Layout::PaneNode & aPaneNode);
 
 
 	public:
