@@ -238,9 +238,20 @@ namespace WxDockUI
 		}
 		else if (aTarget.isPaneSplit())
 		{
-			if ((aTarget.mPane == nullptr) || (aTarget.mPane == &aDraggedPane))
+			if (aTarget.mPane == nullptr)
 			{
 				return;
+			}
+			if (aTarget.mPane == &aDraggedPane)
+			{
+				auto tab = aTarget.mPane->parent()->asTabNode();
+				if (
+					(tab == nullptr) ||         // The target pane is not within a tab
+					(tab->panes().size() == 1)  // The source pane is the last pane in a tab
+				)
+				{
+					return;
+				}
 			}
 			auto pos = aTarget.dockPosition();
 			didMove = Layout::Ops::movePaneToNodeEdge(mRoot, paneId, const_cast<Layout::PaneNode &>(*aTarget.mPane), pos);

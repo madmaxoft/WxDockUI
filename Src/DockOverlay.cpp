@@ -196,7 +196,10 @@ namespace WxDockUI::Internal
 		mIconRects[DockTarget::Kind::PaneTab] = wxRect(pcx - ICON_SIZE / 2, pcy - ICON_SIZE / 2, ICON_SIZE, ICON_SIZE);
 		if (
 			(mHoveredPane != mCurrentDragNode) ||  // Dragging into another pane
-			(mHoveredPane->parent()->type() == Layout::NodeType::Tab)  // Dragging into self, but self is within a tab node
+			(
+				(mHoveredPane->parent()->type() == Layout::NodeType::Tab)  &&  // Dragging into self, but self is within a tab node
+				(mHoveredPane->parent()->asTabNode()->panes().size() > 1)      // Not the only child in the tab node
+			)
 		)
 		{
 			mIconRects[DockTarget::Kind::PaneSplitLeft]   = wxRect(pcx - 3 * ICON_SIZE / 2 - ICON_SPACING, pcy - ICON_SIZE / 2, ICON_SIZE, ICON_SIZE);

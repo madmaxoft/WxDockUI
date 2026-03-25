@@ -606,15 +606,15 @@ namespace WxDockUI::Layout::Ops
 		WxDockUI::DockPosition aEdge
 	)
 	{
+		auto orientation = orientationForEdge(aEdge);
+		auto parent = aTargetNode.parent();
+		assert(parent != nullptr);  // Cannot replace the root itself
+
 		auto removed = removePane(aRoot, aPaneId);
 		if (removed == nullptr)
 		{
 			return false;
 		}
-
-		auto orientation = orientationForEdge(aEdge);
-		auto parent = aTargetNode.parent();
-		assert(parent != nullptr);  // Cannot replace the root itself
 
 		// If parent is a TabNode, operate on the TabNode itself instead
 		BaseNode * effectiveTarget = &aTargetNode;
