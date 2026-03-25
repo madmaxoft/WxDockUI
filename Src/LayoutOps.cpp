@@ -492,6 +492,45 @@ namespace WxDockUI::Layout::Ops
 
 
 
+	bool tryReplaceTabWithOnlyChild(TabNode & aTabNode)
+	{
+		if (aTabNode.panes().size() != 1)
+		{
+			return false;
+		}
+		if (aTabNode.pane(0)->intendedDockPos() == DockPosition::Center)
+		{
+			return false;
+		}
+		auto parent = aTabNode.parent();
+		auto remaining = aTabNode.removePane(0);
+		switch (parent->type())
+		{
+			case NodeType::Split:
+			{
+				auto parentSplit = parent->asSplitNode();
+				parentSplit->replaceChild(&aTabNode, std::move(remaining));
+				return true;
+			}
+			case NodeType::Root:
+			{
+				auto root = static_cast<RootNode *>(parent);
+				root->setChild(std::move(remaining));
+				return true;
+			}
+			default:
+			{
+				assert(!"Invalid parent type");
+				return false;
+			}
+		}
+	}
+
+
+
+
+
+
 	std::unique_ptr<PaneNode> removePane(RootNode & aRoot, const std::string & aPaneId)
 	{
 		// Find the pane node:
@@ -829,7 +868,8 @@ namespace WxDockUI::Layout::Ops
 			}
 			case NodeType::Tab:
 			{
-				// TabNode contains only PaneNodes — nothing structural to clean
+				// If the TabNode contains only a single not-central PaneNode, replace it with the PaneNode:
+				tryReplaceTabWithOnlyChild(*(aNode->asTabNode()));
 				return;
 			}
 			case NodeType::Pane:

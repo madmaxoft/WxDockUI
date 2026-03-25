@@ -27,6 +27,10 @@ namespace WxDockUI::Layout::Ops
 	Returns true if replaced, false if not. */
 	bool tryReplaceSplitWithOnlyChild(SplitNode & aSplitNode);
 
+	/** If the tab has only one child pane and it is not central, replaces the tab in its parent with the child.
+	Returns true if replaced, false if not. */
+	bool tryReplaceTabWithOnlyChild(TabNode & aTabNode);
+
 	/** Removes the specified pane from the hierarchy under root.
 	Returns the pane's owning pointer. */
 	std::unique_ptr<PaneNode> removePane(RootNode & aRoot, const std::string & aPaneId);

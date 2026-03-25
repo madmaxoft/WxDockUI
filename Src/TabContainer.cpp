@@ -44,6 +44,23 @@ namespace WxDockUI::Internal
 
 	TabContainer::~TabContainer()
 	{
+		// Reparent all tabs' contents into FrameDockManager:
+		for (auto & tab: mPaneTabs)
+		{
+			auto paneContents = mFrameDockManager.layoutEngine().maybePaneContainer(*(tab.first));
+			if (paneContents == nullptr)
+			{
+				continue;
+			}
+			if (paneContents->GetParent() == tab.second.mPanel.get())
+			{
+				#ifdef WXDOCKUI_DEBUG_LIFETIME
+					std::cout << "Pane " << tab.first->paneId() << " still in TabContainer that is being removed, reparenting." << std::endl;
+				#endif
+				paneContents->Reparent(mFrameDockManager.frame());
+			}
+		}
+
 		// Remove all pages from mNotebook, without actually deleting them (they are owned by mPaneTabs):
 		mNotebook->Freeze();
 		while (mNotebook->GetPageCount() > 0)
@@ -245,7 +262,7 @@ namespace WxDockUI::Internal
 
 
 
-	TabContainer::Tab & TabContainer::tabForPane(const Layout::PaneNode & aPaneNode)
+	TabContainer::Tab & TabContainer::ensureTabForPane(const Layout::PaneNode & aPaneNode)
 	{
 		auto & tab = mPaneTabs[&aPaneNode];
 		if (tab.mPanel != nullptr)

@@ -135,10 +135,11 @@ namespace WxDockUI::Internal
 
 	PaneContainer::~PaneContainer()
 	{
-		mClientWindow->Reparent(mFrameDockManager.frame());
 		#ifdef WXDOCKUI_DEBUG_LIFETIME
 			std::cout << "Deleting a PaneContainer at " << this << " for pane " << mPaneNode.paneId() << "." << std::endl;
 		#endif
+
+		mClientWindow->Reparent(mFrameDockManager.frame());
 	}
 
 

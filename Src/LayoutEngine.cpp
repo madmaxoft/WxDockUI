@@ -46,6 +46,7 @@ namespace WxDockUI::Layout
 		const wxRect & aRect
 	)
 	{
+		assert(aParent != nullptr);
 		assert(aRect.width > 0);
 		assert(aRect.height > 0);
 

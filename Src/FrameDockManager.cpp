@@ -267,7 +267,11 @@ namespace WxDockUI
 			Layout::Ops::validateLayoutTree(mRoot, &std::cerr);
 		#endif
 
-		updateLayout();
+		// Call updateLayout after processing all events, since this performDock call is most likely called
+		// from within an event handler for an object that could get destroyed by the re-layout
+		mFrame.CallAfter([this](){
+			updateLayout();
+		});
 	}
 
 

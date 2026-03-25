@@ -57,7 +57,7 @@ namespace WxDockUI::Internal
 	SplitContainer::~SplitContainer()
 	{
 		#ifdef WXDOCKUI_DEBUG_LIFETIME
-			std::cout << "Deleting a SplitContainer at " << this << " with " << mSplitNode.children().size() << " children." << std::endl;
+			std::cout << "Deleting a SplitContainer at " << this << " with " << GetChildren().size() << " children." << std::endl;
 		#endif
 
 		clear();
@@ -290,13 +290,13 @@ namespace WxDockUI::Internal
 	void SplitContainer::clear()
 	{
 		#ifdef WXDOCKUI_DEBUG_LIFETIME
-			std::cout << "Clearing a SplitContainer at " << this << " with " << mSplitNode.children().size() << " children." << std::endl;
+			std::cout << "Clearing a SplitContainer at " << this << " with " << GetChildren().size() << " children." << std::endl;
 		#endif
 
 		// Reparent all children from this to mFrameDockManager, to avoid deleting them in the destructor:
 		// (Must first create a vector, since Reparent() invalidates the list returned by GetChildren())
 		std::vector<wxWindow *> children;
-		for (auto child: this->GetChildren())
+		for (auto child: GetChildren())
 		{
 			children.push_back(child);
 		}
