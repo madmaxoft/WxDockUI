@@ -79,6 +79,9 @@ namespace WxDockUI::Internal
 		/** Called by WX to draw the contents. Draws the splitter handles. */
 		void onPaint(wxPaintEvent & aEvent);
 
+		/** Called by WX when it needs to set the cursor. */
+		void onSetCursor(wxSetCursorEvent & aEvent);
+
 
 	public:
 

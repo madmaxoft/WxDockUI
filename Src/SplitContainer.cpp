@@ -41,13 +41,13 @@ namespace WxDockUI::Internal
 		#endif
 
 		SetBackgroundStyle(wxBG_STYLE_PAINT);
-		SetCursor((aSplitNode.orientation() == SplitOrientation::Horizontal) ? wxCURSOR_SIZEWE : wxCURSOR_SIZENS);
 
 		Bind(wxEVT_PAINT, &SplitContainer::onPaint, this);
 		Bind(wxEVT_LEFT_DOWN,          &SplitContainer::onSplitterMouseLeftDown, this);
 		Bind(wxEVT_MOTION,             &SplitContainer::onSplitterMouseMotion, this);
 		Bind(wxEVT_LEFT_UP,            &SplitContainer::onSplitterMouseLeftUp, this);
 		Bind(wxEVT_MOUSE_CAPTURE_LOST, &SplitContainer::onSplitterMouseCaptureLost, this);
+		Bind(wxEVT_SET_CURSOR,         &SplitContainer::onSetCursor, this);
 	}
 
 
@@ -239,6 +239,24 @@ namespace WxDockUI::Internal
 				dc.DrawLine(r.x, r.y + r.height - 1, r.x + r.width, r.y + r.height - 1);
 			}
 		}
+	}
+
+
+
+
+
+	void SplitContainer::onSetCursor(wxSetCursorEvent & aEvent)
+	{
+		auto pos = ScreenToClient(wxGetMousePosition());
+		for (const auto & r: mSplitterRects)
+		{
+			if (r.Contains(pos))
+			{
+				aEvent.SetCursor((mSplitNode.orientation() == SplitOrientation::Horizontal) ? wxCURSOR_SIZEWE : wxCURSOR_SIZENS);
+				return;
+			}
+		}
+		aEvent.Skip();
 	}
 
 
