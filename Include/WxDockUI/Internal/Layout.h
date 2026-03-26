@@ -185,8 +185,8 @@ namespace WxDockUI::Layout
 		// Getters:
 		const std::vector<std::unique_ptr<PaneNode>> & panes() const { return mPanes; }
 		int activeIndex() const { return mActiveIndex; }
-		const PaneNode * pane(size_t aIndex) const { return mPanes[aIndex].get(); }
-		const PaneNode * activePane() const { return mPanes[mActiveIndex].get(); }
+		const PaneNode * pane(size_t aIndex) const;
+		const PaneNode * activePane() const;
 
 		// BaseNode override:
 		virtual void dump(std::ostream & aOut, int aIndent) const override;

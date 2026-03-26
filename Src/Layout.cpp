@@ -317,6 +317,31 @@ namespace WxDockUI::Layout
 
 
 
+	const PaneNode * WxDockUI::Layout::TabNode::pane(size_t aIndex) const
+	{
+		assert(aIndex < mPanes.size());
+		 return mPanes[aIndex].get();
+	}
+
+
+
+
+
+	const PaneNode * TabNode::activePane() const
+	{
+		if (mActiveIndex < 0)
+		{
+			// This may happen for an empty (central) tab node
+			return nullptr;
+		}
+		assert(mActiveIndex < mPanes.size());
+		return mPanes[mActiveIndex].get();
+	}
+
+
+
+
+
 	void TabNode::dump(std::ostream & aOut, int aIndent) const
 	{
 		indent(aOut, aIndent);
