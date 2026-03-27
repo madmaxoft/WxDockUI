@@ -233,15 +233,39 @@ namespace WxDockUI::Internal
 
 	void PaneDragController::moveDragGhostToTargetPane(int aTopPercent, int aLeftPercent, int aBottomPercent, int aRightPercent)
 	{
-		auto pane = mCurrentTarget.value().mPane;
 		wxWindow * wnd;
-		if (pane->parent()->type() == WxDockUI::Layout::NodeType::Tab)
+		auto parentNode = mCurrentTarget.value().mNode->parent();
+		if (parentNode->type() == WxDockUI::Layout::NodeType::Tab)
 		{
-			wnd = mFrameDockManager.layoutEngine().ensureTabContainer(pane->parent()->asTabNode());
+			wnd = mFrameDockManager.layoutEngine().ensureTabContainer(parentNode->asTabNode());
 		}
 		else
 		{
-			wnd = mFrameDockManager.findPaneWindow(*pane);
+			switch (mCurrentTarget.value().mNode->type())
+			{
+				case Layout::NodeType::Pane:
+				{
+					auto pane = mCurrentTarget.value().mNode->asPaneNode();
+					assert(pane != nullptr);
+					wnd = mFrameDockManager.findPaneWindow(*pane);
+					break;
+				}
+				case Layout::NodeType::Tab:
+				{
+					wnd = mFrameDockManager.layoutEngine().maybeTabContainer(mCurrentTarget.value().mNode->asTabNode());
+					break;
+				}
+				default:
+				{
+					assert(!"Unhandled node type");
+					return;
+				}
+			}
+		}
+		if (wnd == nullptr)
+		{
+			wxLogWarning("PaneDragController::moveDragGhostToTargetPane: Invalid window");
+			return;
 		}
 		auto paneRect = wnd->GetScreenRect();
 		int t = paneRect.y + paneRect.height * aTopPercent    / 100;

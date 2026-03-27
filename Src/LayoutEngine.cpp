@@ -296,6 +296,22 @@ namespace WxDockUI::Layout
 
 
 
+	const Internal::TabContainer * LayoutEngine::tabContainerAtScreenPos(const wxPoint & aScreenPos)
+	{
+		for (const auto & tab: mTabContainers)
+		{
+			if (tab.second->GetScreenRect().Contains(aScreenPos))
+			{
+				return tab.second.get();
+			}
+		}
+		return nullptr;
+	}
+
+
+
+
+
 	Internal::TabContainer * LayoutEngine::ensureTabContainer(TabNode * aTabNode)
 	{
 		auto itr = mTabContainers.find(aTabNode);
@@ -309,6 +325,20 @@ namespace WxDockUI::Layout
 		auto * raw = tc.get();
 		mTabContainers.emplace(aTabNode, std::move(tc));
 		return raw;
+	}
+
+
+
+
+
+	Internal::TabContainer * LayoutEngine::maybeTabContainer(const TabNode * aTabNode)
+	{
+		auto itr = mTabContainers.find(aTabNode);
+		if (itr != mTabContainers.end())
+		{
+			return itr->second.get();
+		}
+		return nullptr;
 	}
 
 

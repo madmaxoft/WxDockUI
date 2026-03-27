@@ -42,7 +42,8 @@ namespace WxDockUI::Layout
 
 
 	/** Processes layout into actual UI elements that can be displayed.
-	Attaches PaneContainer instances to PaneNodes and TabContainerWindow instances to TabNodes.
+	Attaches PaneContainer instances to PaneNodes, TabContainerWindow instances to TabNodes and
+	SplitContainer instances to SplitNodes.
 	Since it knows about all the geometry, it also performs hit-testing */
 	class LayoutEngine
 	{
@@ -121,9 +122,16 @@ namespace WxDockUI::Layout
 		/** Returns the PaneNode at the specified screen position, or nullptr if none. */
 		const Layout::PaneNode * paneNodeAtScreenPos(const wxPoint & aScreenPos);
 
+		/** Returns the TabContainer at the specified screen position, or nullptr if none. */
+		const Internal::TabContainer * tabContainerAtScreenPos(const wxPoint & aScreenPos);
+
 		/** Internal: Returns the TabContainer representing the specified layout tab node.
 		If no such window exists, creates a new one and remembers it in mTabContainerWindows. */
 		Internal::TabContainer * ensureTabContainer(TabNode * aTabNode);
+
+		/** Internal: Returns the TabContainer representing the specified layout tab node.
+		If no such window exists, returns nullptr. */
+		Internal::TabContainer * maybeTabContainer(const TabNode * aTabNode);
 
 		/** Internal: Returns the PaneContainer representing the specified layout pane node.
 		If no such container exists, creates a new one and remembers it in mPaneContainers.

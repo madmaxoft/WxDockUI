@@ -47,8 +47,8 @@ namespace WxDockUI::Internal
 		wxPoint mCurrentMouseScreenPos;
 
 		const Layout::BaseNode * mCurrentDragNode = nullptr;
-		const Layout::PaneNode * mHoveredPane = nullptr;
-		wxRect mHoveredPaneRectScreen;
+		const Layout::BaseNode * mHoveredNode = nullptr;
+		wxRect mHoveredNodeRectScreen;
 
 		/** Icon rects in screen coordinates */
 		std::map<DockTarget::Kind, wxRect> mIconRects;

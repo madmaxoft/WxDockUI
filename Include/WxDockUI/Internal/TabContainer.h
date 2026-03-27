@@ -61,7 +61,7 @@ namespace WxDockUI::Internal
 		FrameDockManager & mFrameDockManager;
 
 		/** The layout node this container reflects. */
-		Layout::TabNode & mTabNode;
+		const Layout::TabNode & mTabNode;
 
 		/** The GUI page switcher. **/
 		wxNotebook * mNotebook = nullptr;
@@ -104,7 +104,7 @@ namespace WxDockUI::Internal
 		TabContainer(
 			FrameDockManager & aFrameDockManager,
 			wxWindow * aParent,
-			Layout::TabNode & aTabNode
+			const Layout::TabNode & aTabNode
 		);
 
 		~TabContainer();
@@ -114,6 +114,8 @@ namespace WxDockUI::Internal
 
 		/** Updates the GUI tab switcher to show all the children of mTabNode. */
 		void updateTabs();
+
+		const Layout::TabNode & tabNode() const { return mTabNode; }
 	};
 
 

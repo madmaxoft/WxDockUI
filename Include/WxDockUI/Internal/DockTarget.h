@@ -35,7 +35,7 @@ namespace WxDockUI::Internal
 			PaneTab
 		} mKind = Kind::Invalid;
 
-		const WxDockUI::Layout::PaneNode * mPane = nullptr;
+		const WxDockUI::Layout::BaseNode * mNode = nullptr;
 
 		bool isValid() const
 		{
@@ -44,7 +44,7 @@ namespace WxDockUI::Internal
 
 		bool operator ==(const DockTarget & aOther) const
 		{
-			return (mKind == aOther.mKind) && (mPane == aOther.mPane);
+			return (mKind == aOther.mKind) && (mNode == aOther.mNode);
 		}
 
 		bool operator !=(const DockTarget & aOther) const
@@ -145,6 +145,8 @@ namespace WxDockUI::Internal
 		/** Returns a human-readable description of the target, used for debugging dumps. */
 		std::string describe() const
 		{
+			auto pane = mNode->asPaneNode();
+			auto desc = (pane != nullptr) ? pane->paneId() : std::format("Node %p/%d", static_cast<const void *>(mNode), static_cast<int>(mNode->type()));
 			switch (mKind)
 			{
 				case Kind::Invalid:         return "Invalid";
@@ -152,11 +154,11 @@ namespace WxDockUI::Internal
 				case Kind::RootSplitLeft:   return "RootSplitLeft";
 				case Kind::RootSplitBottom: return "RootSplitBottom";
 				case Kind::RootSplitRight:  return "RootSplitRight";
-				case Kind::PaneSplitTop:    return std::format("PaneSplitTop({})",    mPane->paneId());
-				case Kind::PaneSplitLeft:   return std::format("PaneSplitLeft({})",   mPane->paneId());
-				case Kind::PaneSplitBottom: return std::format("PaneSplitBottom({})", mPane->paneId());
-				case Kind::PaneSplitRight:  return std::format("PaneSplitRight({})",  mPane->paneId());
-				case Kind::PaneTab:         return std::format("PaneTab({})",         mPane->paneId());
+				case Kind::PaneSplitTop:    return std::format("PaneSplitTop({})",    desc);
+				case Kind::PaneSplitLeft:   return std::format("PaneSplitLeft({})",   desc);
+				case Kind::PaneSplitBottom: return std::format("PaneSplitBottom({})", desc);
+				case Kind::PaneSplitRight:  return std::format("PaneSplitRight({})",  desc);
+				case Kind::PaneTab:         return std::format("PaneTab({})",         desc);
 			}
 			assert(!"Unknown target kind");
 			return "Unknown target kind";

@@ -238,13 +238,13 @@ namespace WxDockUI
 		}
 		else if (aTarget.isPaneSplit())
 		{
-			if (aTarget.mPane == nullptr)
+			if (aTarget.mNode == nullptr)
 			{
 				return;
 			}
-			if (aTarget.mPane == &aDraggedPane)
+			if (aTarget.mNode == &aDraggedPane)
 			{
-				auto tab = aTarget.mPane->parent()->asTabNode();
+				auto tab = aTarget.mNode->parent()->asTabNode();
 				if (
 					(tab == nullptr) ||         // The target pane is not within a tab
 					(tab->panes().size() == 1)  // The source pane is the last pane in a tab
@@ -254,15 +254,33 @@ namespace WxDockUI
 				}
 			}
 			auto pos = aTarget.dockPosition();
-			didMove = Layout::Ops::movePaneToNodeEdge(mRoot, paneId, const_cast<Layout::PaneNode &>(*aTarget.mPane), pos);
+			didMove = Layout::Ops::movePaneToNodeEdge(mRoot, paneId, const_cast<Layout::BaseNode &>(*aTarget.mNode), pos);
 		}
 		else if (aTarget.mKind == Internal::DockTarget::Kind::PaneTab)
 		{
-			if ((aTarget.mPane == nullptr) || (aTarget.mPane == &aDraggedPane))
+			if ((aTarget.mNode == nullptr) || (aTarget.mNode == &aDraggedPane))
 			{
 				return;
 			}
-			didMove = Layout::Ops::mergePanesIntoTab(mRoot, paneId, aTarget.mPane->paneId(), -1);
+			switch (aTarget.mNode->type())
+			{
+				case Layout::NodeType::Pane:
+				{
+					didMove = Layout::Ops::mergePanesIntoTab(mRoot, paneId, aTarget.mNode->asPaneNode()->paneId(), -1);
+					break;
+				}
+				case Layout::NodeType::Tab:
+				{
+					auto tabNode = aTarget.mNode->asTabNode();
+					didMove = Layout::Ops::movePaneToTab(mRoot, paneId, const_cast<Layout::TabNode &>(*tabNode), 0);
+					break;
+				}
+				default:
+				{
+					assert(!"Unhandled node type");
+					break;
+				}
+			}
 		}
 		if (!didMove)
 		{
@@ -283,6 +301,19 @@ namespace WxDockUI
 		mFrame.CallAfter([this](){
 			updateLayout();
 		});
+	}
+
+
+
+
+
+	void FrameDockManager::uncaptureMouse()
+	{
+		auto captured = mFrame.GetCapture();
+		if (captured != nullptr)
+		{
+			captured->ReleaseMouse();
+		}
 	}
 
 

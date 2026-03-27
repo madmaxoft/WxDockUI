@@ -18,7 +18,7 @@ namespace WxDockUI::Internal
 	TabContainer::TabContainer(
 		FrameDockManager & aFrameDockManager,
 		wxWindow * aParent,
-		Layout::TabNode & aTabNode
+		const Layout::TabNode & aTabNode
 	):
 		Super(aParent, wxID_ANY),
 		mFrameDockManager(aFrameDockManager),
@@ -78,16 +78,7 @@ namespace WxDockUI::Internal
 
 	void TabContainer::updateLayout()
 	{
-		const int activeIndex = mTabNode.activeIndex();
-		const auto & panes = mTabNode.panes();
-
-		if ((activeIndex < 0) || (activeIndex >= static_cast<int>(panes.size())))
-		{
-			return;
-		}
-
 		updateTabs();
-
 		Layout();
 	}
 
@@ -156,9 +147,10 @@ namespace WxDockUI::Internal
 
 
 
+
 	void TabContainer::onNotebookChanged(wxBookCtrlEvent & aEvent)
 	{
-		mTabNode.setActiveIndex(mNotebook->GetSelection());
+		const_cast<Layout::TabNode &>(mTabNode).setActiveIndex(mNotebook->GetSelection());
 	}
 
 

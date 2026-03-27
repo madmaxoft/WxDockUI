@@ -164,6 +164,9 @@ namespace WxDockUI
 
 		/** Internal: Performs the dock operation on aDraggedPane specified by the target. */
 		void performDock(const Layout::PaneNode & aDraggedPane, const Internal::DockTarget & aTarget);
+
+		/** Internal: Call this before an expected breakpoint to allow the debugger / IDE to use the mouse. */
+		void uncaptureMouse();
 	};
 
 

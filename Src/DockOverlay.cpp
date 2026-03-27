@@ -1,5 +1,6 @@
 #include <WxDockUI/Internal/DockOverlay.h>
 #include <WxDockUI/Internal/PaneContainer.h>
+#include <WxDockUI/Internal/TabContainer.h>
 #include <WxDockUI/FrameDockManager.h>
 #include <wx/dcbuffer.h>
 
@@ -65,7 +66,7 @@ namespace WxDockUI::Internal
 		else
 		{
 			Hide();
-			mHoveredPane = nullptr;
+			mHoveredNode = nullptr;
 			mIconRects.clear();
 		}
 	}
@@ -113,7 +114,7 @@ namespace WxDockUI::Internal
 			if (rect.Contains(aScreenPos))
 			{
 				result.mKind = kind;
-				result.mPane = mHoveredPane;
+				result.mNode = mHoveredNode;
 				return result;
 			}
 		}
@@ -126,22 +127,30 @@ namespace WxDockUI::Internal
 
 	void DockOverlay::updateHoveredPane(const wxPoint & aScreenPos)
 	{
-		mHoveredPane = mFrameDockManager.layoutEngine().paneNodeAtScreenPos(aScreenPos);
-		if (mHoveredPane == nullptr)
+		// First try all panes:
+		auto pane = mFrameDockManager.layoutEngine().paneNodeAtScreenPos(aScreenPos);
+		if (pane != nullptr)
 		{
+			auto window = mFrameDockManager.findPaneWindow(*pane);
+			if (window == nullptr)
+			{
+				assert(!"Invalid pane window");
+				mHoveredNode = nullptr;
+				return;
+			}
+			mHoveredNode = pane;
+			mHoveredNodeRectScreen = window->GetScreenRect();  // wxRect(paneScreenTopLeft, paneRect.GetSize());
 			return;
 		}
 
-		auto window = mFrameDockManager.findPaneWindow(*mHoveredPane);
-		if (window == nullptr)
+		// Not in a pane, try tabs:
+		auto tab = mFrameDockManager.layoutEngine().tabContainerAtScreenPos(aScreenPos);
+		if (tab != nullptr)
 		{
-			assert(!"Invalid pane window");
-			mHoveredPane = nullptr;
+			mHoveredNode = &tab->tabNode();
+			mHoveredNodeRectScreen = tab->GetScreenRect();
 			return;
 		}
-		auto paneRect = window->GetRect();
-		auto paneScreen = window->GetParent()->ClientToScreen(paneRect.GetTopLeft());
-		mHoveredPaneRectScreen = wxRect(paneScreen, paneRect.GetSize());
 	}
 
 
@@ -186,19 +195,19 @@ namespace WxDockUI::Internal
 			);
 
 		// Pane icons:
-		if (mHoveredPane == nullptr)
+		if (mHoveredNode == nullptr)
 		{
 			return;
 		}
-		const wxRect r = mHoveredPaneRectScreen;
+		const wxRect r = mHoveredNodeRectScreen;
 		const int pcx = r.x + r.width / 2;
 		const int pcy = r.y + r.height / 2;
 		mIconRects[DockTarget::Kind::PaneTab] = wxRect(pcx - ICON_SIZE / 2, pcy - ICON_SIZE / 2, ICON_SIZE, ICON_SIZE);
 		if (
-			(mHoveredPane != mCurrentDragNode) ||  // Dragging into another pane
+			(mHoveredNode != mCurrentDragNode) ||  // Dragging into another pane
 			(
-				(mHoveredPane->parent()->type() == Layout::NodeType::Tab)  &&  // Dragging into self, but self is within a tab node
-				(mHoveredPane->parent()->asTabNode()->panes().size() > 1)      // Not the only child in the tab node
+				(mHoveredNode->parent()->type() == Layout::NodeType::Tab)  &&  // Dragging into self, but self is within a tab node
+				(mHoveredNode->parent()->asTabNode()->panes().size() > 1)      // Not the only child in the tab node
 			)
 		)
 		{
