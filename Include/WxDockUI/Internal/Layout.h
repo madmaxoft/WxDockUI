@@ -147,6 +147,9 @@ namespace WxDockUI::Layout
 
 		// BaseNode override:
 		virtual void dump(std::ostream & aOut, int aIndent) const override;
+
+		/** Returns the mIntendedDockPos as a human-readable string (used for dumps). */
+		std::string intendedDockPosStr() const;
 	};
 
 

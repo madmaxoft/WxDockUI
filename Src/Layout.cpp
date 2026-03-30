@@ -191,7 +191,26 @@ namespace WxDockUI::Layout
 	void PaneNode::dump(std::ostream & aOut, int aIndent) const
 	{
 		indent(aOut, aIndent);
-		aOut << "Pane(\"" << mPaneId << "\")";
+		aOut << "Pane(\"" << mPaneId << "\")  /* " << intendedDockPosStr() << " */";
+	}
+
+
+
+
+
+	std::string PaneNode::intendedDockPosStr() const
+	{
+		switch (mIntendedDockPos)
+		{
+			case DockPosition::Top:      return "top";      break;
+			case DockPosition::Left:     return "left";     break;
+			case DockPosition::Bottom:   return "bottom";   break;
+			case DockPosition::Right:    return "right";    break;
+			case DockPosition::Center:   return "center";   break;
+			case DockPosition::Floating: return "floating"; break;
+		}
+		assert(!"Unknown intendedDockPos");
+		return "unknown";
 	}
 
 
@@ -350,7 +369,7 @@ namespace WxDockUI::Layout
 		for (const auto & pane: mPanes)
 		{
 			indent(aOut, aIndent + 1);
-			aOut << "\"" << pane->paneId() << "\",\n";
+			aOut << "\"" << pane->paneId() << "\",  /* " << pane->intendedDockPosStr() << " */\n";
 		}
 		indent(aOut, aIndent);
 		aOut << "})";
