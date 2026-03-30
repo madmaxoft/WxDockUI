@@ -591,6 +591,15 @@ namespace WxDockUI::Layout::Ops
 			return false;
 		}
 
+		if (aTargetTabNode.panes().empty())
+		{
+			removed->setIntendedDockPos(DockPosition::Center);
+		}
+		else
+		{
+			removed->setIntendedDockPos(aTargetTabNode.pane(0)->intendedDockPos());
+		}
+
 		aTargetTabNode.insertPane(std::move(removed), aInsertIndex);
 		return true;
 	}
@@ -615,6 +624,7 @@ namespace WxDockUI::Layout::Ops
 		{
 			return false;
 		}
+		removed->setIntendedDockPos(aEdge);
 
 		// If parent is a TabNode, operate on the TabNode itself instead
 		BaseNode * effectiveTarget = &aTargetNode;
