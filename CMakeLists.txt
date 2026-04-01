@@ -57,7 +57,7 @@ target_include_directories(WxDockUI-static PUBLIC Include)
 
 # Debugging toggles:
 # If enabled, object creation and deletion will get dumped to std::cout:
-target_compile_definitions(WxDockUI-static PRIVATE WXDOCKUI_DEBUG_LIFETIME)
+target_compile_definitions(WxDockUI-static PRIVATE WXDOCKUI_DEBUG_LIFETIME WXDOCKUI_DUMP_LAYOUT_ON_DOCK)
 
 # If enabled, the FrameDockManager dumps its layout before and after performing a dock:
 # target_compile_definitions(WxDockUI-static PRIVATE WXDOCKUI_DUMP_LAYOUT_ON_DOCK)

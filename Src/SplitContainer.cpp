@@ -69,35 +69,41 @@ namespace WxDockUI::Internal
 
 	void SplitContainer::recalculatePixelSizes()
 	{
-		float totalRatio = 0;
-		for (const auto & child: mSplitNode.children())
-		{
-			totalRatio += child.mRatio;
-		}
-
-		int offset = 0;
+		int totalSizes = mSplitNode.sumSizes();
 		auto rect = GetClientRect();
-		auto totalWidth  = rect.width  - (mSplitNode.children().size() - 1) * SPLITTER_SIZE;
-		auto totalHeight = rect.height - (mSplitNode.children().size() - 1) * SPLITTER_SIZE;
+		int totalWidth  = rect.width  - (mSplitNode.children().size() - 1) * SPLITTER_SIZE;
+		int totalHeight = rect.height - (mSplitNode.children().size() - 1) * SPLITTER_SIZE;
+		auto leftOver = ((mSplitNode.orientation() == SplitOrientation::Horizontal) ? totalWidth : totalHeight) - totalSizes;
 		mSplitterPixelSizes.clear();
 		mSplitterRects.clear();
+		int pos = 0;
+		auto numAbsorbers = mSplitNode.numAbsorbers();
+		int sizePerAbsorber = (numAbsorbers > 0) ? (leftOver / numAbsorbers) : 0;
 		for (const auto & child: mSplitNode.children())
 		{
-			float fraction = child.mRatio / totalRatio;
-			wxRect childRect = rect;
 			if (mSplitNode.orientation() == SplitOrientation::Horizontal)
 			{
-				auto width = static_cast<int>(totalWidth * fraction);
+				auto width = child.mSizePx;
+				if (child.mCanAbsorbResize)
+				{
+					// TODO: The last absorber needs adjusting for imprecise math
+					width += sizePerAbsorber;
+				}
 				mSplitterPixelSizes.push_back(width);
-				offset += width + SPLITTER_SIZE;
-				mSplitterRects.emplace_back(offset - SPLITTER_SIZE, 0, SPLITTER_SIZE, rect.height);
+				pos += width + SPLITTER_SIZE;
+				mSplitterRects.emplace_back(pos - SPLITTER_SIZE, 0, SPLITTER_SIZE, rect.height);
 			}
 			else
 			{
-				auto height = static_cast<int>(totalHeight * fraction);
+				auto height = child.mSizePx;
+				if (child.mCanAbsorbResize)
+				{
+					// TODO: The last absorber needs adjusting for imprecise math
+					height += sizePerAbsorber;
+				}
 				mSplitterPixelSizes.push_back(height);
-				offset += height + SPLITTER_SIZE;
-				mSplitterRects.emplace_back(0, offset - SPLITTER_SIZE, rect.width, SPLITTER_SIZE);
+				pos += height + SPLITTER_SIZE;
+				mSplitterRects.emplace_back(0, pos - SPLITTER_SIZE, rect.width, SPLITTER_SIZE);
 			}
 		}
 	}
@@ -155,8 +161,8 @@ namespace WxDockUI::Internal
 		}
 
 		// Apply into the pixel sizes and rects:
-		mSplitterPixelSizes[mDraggedSplitter] = mousePos - minPos;
-		mSplitterPixelSizes[mDraggedSplitter + 1] = maxPos - mousePos;
+		mSplitterPixelSizes[mDraggedSplitter] = mousePos - minPos - mDraggedSplitter * SPLITTER_SIZE;
+		mSplitterPixelSizes[mDraggedSplitter + 1] = maxPos - mousePos + mDraggedSplitter * SPLITTER_SIZE;
 		if (mSplitNode.orientation() == SplitOrientation::Horizontal)
 		{
 			mSplitterRects[mDraggedSplitter].SetLeft(mousePos);
@@ -189,7 +195,7 @@ namespace WxDockUI::Internal
 		size_t idx = 0;
 		for (auto & ch: mSplitNode.children())
 		{
-			ch.mRatio = mSplitterPixelSizes[idx++];
+			ch.mSizePx = mSplitterPixelSizes[idx++];
 		}
 
 		aEvent.Skip();
@@ -283,14 +289,14 @@ namespace WxDockUI::Internal
 			if (mSplitNode.orientation() == SplitOrientation::Horizontal)
 			{
 				int width = mSplitterPixelSizes[idx];
-				childRect.x += offset;
+				childRect.x = offset;
 				childRect.width = width;
 				offset += width + SPLITTER_SIZE;
 			}
 			else
 			{
 				int height = mSplitterPixelSizes[idx];
-				childRect.y += offset;
+				childRect.y = offset;
 				childRect.height = height;
 				offset += height + SPLITTER_SIZE;
 			}

@@ -48,7 +48,6 @@ namespace WxDockUI::Internal
 		std::vector<wxRect> mSplitterRects;
 
 		/** Sizes of individual children, in pixels.
-		Converted from SplitNode ratios upon layouting.
 		Adjusted by the user dragging in onSplitterMouseMove. */
 		std::vector<int> mSplitterPixelSizes;
 

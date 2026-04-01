@@ -394,7 +394,8 @@ namespace WxDockUI::Layout
 
 	void SplitNode::insertChild(
 		std::unique_ptr<BaseNode> aChild,
-		float aRatio,
+		int aSizePx,
+		bool aCanAbsorbResize,
 		size_t aIndex
 	)
 	{
@@ -412,7 +413,8 @@ namespace WxDockUI::Layout
 		aChild->setParent(this);
 		SplitChild child;
 		child.mNode = std::move(aChild);
-		child.mRatio = aRatio;
+		child.mSizePx = aSizePx;
+		child.mCanAbsorbResize = aCanAbsorbResize;
 		mChildren.insert(mChildren.begin() + aIndex, std::move(child));
 	}
 
@@ -481,14 +483,31 @@ namespace WxDockUI::Layout
 
 
 
-	float SplitNode::sumRatios() const
+	int SplitNode::sumSizes() const
 	{
-		float total = 0;
+		int total = 0;
 		for (const auto & ch: mChildren)
 		{
-			total += ch.mRatio;
+			total += ch.mSizePx;
 		}
 		return total;
+	}
+
+
+
+
+
+	int SplitNode::numAbsorbers() const
+	{
+		int res = 0;
+		for (const auto & ch: mChildren)
+		{
+			if (ch.mCanAbsorbResize)
+			{
+				res += 1;
+			}
+		}
+		return res;
 	}
 
 

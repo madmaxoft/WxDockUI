@@ -141,7 +141,8 @@ namespace WxDockUI
 		}
 		else
 		{
-			Layout::Ops::insertEdgePane(mRoot, std::move(paneNode), aOptions.initialDock());
+			auto sizePx = ((aOptions.initialDock() == DockPosition::Left) || (aOptions.initialDock() == DockPosition::Right)) ? aOptions.bestWidth() : aOptions.bestHeight();
+			Layout::Ops::insertEdgePane(mRoot, std::move(paneNode), aOptions.initialDock(), sizePx);
 		}
 		Layout::Ops::cleanup(mRoot);
 		updateLayout();
@@ -233,7 +234,9 @@ namespace WxDockUI
 			{
 				return;
 			}
-			Layout::Ops::insertEdgePane(mRoot, std::move(pane), pos);
+			auto clientRect = mFrame.GetClientRect();
+			auto sizePx = aTarget.isHorizontalSplit() ? (clientRect.width / 5) : (clientRect.height / 5);
+			Layout::Ops::insertEdgePane(mRoot, std::move(pane), pos, sizePx);
 			didMove = true;
 		}
 		else if (aTarget.isPaneSplit())

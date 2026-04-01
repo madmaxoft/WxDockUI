@@ -206,11 +206,13 @@ namespace WxDockUI::Layout
 	{
 	public:
 
-		/** Representation for a single child in the split - the node it contains and the ratio. */
+		/** Representation for a single child in the split:
+		the node it contains, its pixel size and resize-absorption. */
 		struct SplitChild
 		{
 			std::unique_ptr<BaseNode> mNode;
-			float mRatio;
+			int mSizePx;
+			bool mCanAbsorbResize;
 		};
 
 	private:
@@ -223,8 +225,8 @@ namespace WxDockUI::Layout
 
 		explicit SplitNode(SplitOrientation aOrientation);
 
-		/** Adds the specified child node with the specified ratio at the specified index of the children. */
-		void insertChild(std::unique_ptr<BaseNode> aChild, float aRatio, size_t aIndex);
+		/** Adds the specified child node with the specified size and absorption at the specified index of the children. */
+		void insertChild(std::unique_ptr<BaseNode> aChild, int aSizePx, bool aCanAbsorbResize, size_t aIndex);
 
 		/** Removes the node at the specified index from the children and returns its owning pointer.
 		Returns an empty pointer if no such child found. */
@@ -244,8 +246,11 @@ namespace WxDockUI::Layout
 		BaseNode * child(size_t aIndex) const { return mChildren[aIndex].mNode.get(); }
 		SplitOrientation orientation() const { return mOrientation; }
 
-		/** Returns the sum of all the children's ratios. */
-		float sumRatios() const;
+		/** Returns the sum of all the children's pixel sizes. */
+		int sumSizes() const;
+
+		/** Returns the number of children that have their mCanAbsorbResize set to true. */
+		int numAbsorbers() const;
 
 		// BaseNode override:
 		virtual void dump(std::ostream & aOut, int aIndent) const override;

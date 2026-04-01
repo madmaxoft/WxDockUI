@@ -17,7 +17,7 @@ namespace WxDockUI::Layout::Ops
 	void insertCenterPane(RootNode & aRoot, std::unique_ptr<PaneNode> aPaneNode);
 
 	/** Inserts the specified pane node to the specified dock edge in the root's hierarchy. */
-	void insertEdgePane(RootNode & aRoot, std::unique_ptr<PaneNode> aPaneNode, WxDockUI::DockPosition aPos);
+	void insertEdgePane(RootNode & aRoot, std::unique_ptr<PaneNode> aPaneNode, WxDockUI::DockPosition aPos, int aSizePx);
 
 	/** Returns the PaneNode instance representing the specified pane ID in the hierarchy under aNode.
 	Returns nullptr if not found. */

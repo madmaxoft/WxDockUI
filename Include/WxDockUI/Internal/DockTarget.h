@@ -142,6 +142,33 @@ namespace WxDockUI::Internal
 
 
 
+
+
+		/** Returns whether the stored kind is a horizontal split. */
+		bool isHorizontalSplit() const
+		{
+			return isHorizontalSplitKind(mKind);
+		}
+
+
+
+
+
+		/** Returns whether the specified kind is a horizontal split. */
+		static bool isHorizontalSplitKind(Kind aKind)
+		{
+			return (
+				(aKind == Kind::PaneSplitLeft) ||
+				(aKind == Kind::PaneSplitRight) ||
+				(aKind == Kind::RootSplitLeft) ||
+				(aKind == Kind::RootSplitRight)
+			);
+		}
+
+
+
+
+
 		/** Returns a human-readable description of the target, used for debugging dumps. */
 		std::string describe() const
 		{

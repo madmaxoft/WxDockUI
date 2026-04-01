@@ -291,7 +291,7 @@ namespace WxDockUI::Layout::Ops
 				else
 				{
 					auto & split = static_cast<SplitNode &>(*parent);
-					split.insertChild(std::move(tab), 1.0f, 0);
+					split.insertChild(std::move(tab), 1, true, 0);
 				}
 				return;
 			}
@@ -317,7 +317,8 @@ namespace WxDockUI::Layout::Ops
 	void insertEdgePane(
 		RootNode & aRoot,
 		std::unique_ptr<PaneNode> aPaneNode,
-		DockPosition aPosition
+		DockPosition aPosition,
+		int aSizePx
 	)
 	{
 		auto oldChild = aRoot.setChild(nullptr);
@@ -345,7 +346,7 @@ namespace WxDockUI::Layout::Ops
 				const size_t index = ((aPosition == DockPosition::Left) || (aPosition == DockPosition::Top))
 					? 0
 					: split->children().size();
-				split->insertChild(std::move(aPaneNode), split->sumRatios() / 4, index);
+				split->insertChild(std::move(aPaneNode), aSizePx, false , index);
 				aRoot.setChild(std::move(oldChild));
 				return;
 			}
@@ -393,13 +394,13 @@ namespace WxDockUI::Layout::Ops
 		aPaneNode->setIntendedDockPos(aPosition);
 		if (paneFirst)
 		{
-			split->insertChild(std::move(aPaneNode), 1.0f, 0);
-			split->insertChild(std::move(oldChild), 4.0f, 1);
+			split->insertChild(std::move(aPaneNode), aSizePx, false, 0);
+			split->insertChild(std::move(oldChild), aSizePx * 4, true, 1);
 		}
 		else
 		{
-			split->insertChild(std::move(oldChild), 4.0f, 0);
-			split->insertChild(std::move(aPaneNode), 1.0f, 1);
+			split->insertChild(std::move(oldChild), aSizePx * 4, true, 0);
+			split->insertChild(std::move(aPaneNode), aSizePx, false, 1);
 		}
 		aRoot.setChild(std::move(split));
 	}
@@ -626,11 +627,10 @@ namespace WxDockUI::Layout::Ops
 		}
 		removed->setIntendedDockPos(aEdge);
 
-		// If parent is a TabNode, operate on the TabNode itself instead
+		// If target's parent is a TabNode, target the TabNode itself instead
 		BaseNode * effectiveTarget = &aTargetNode;
 		if (parent->type() == NodeType::Tab)
 		{
-			// Move up: we want to split the tab container, not the pane inside it
 			effectiveTarget = parent;
 			parent = parent->parent();
 		}
@@ -658,7 +658,7 @@ namespace WxDockUI::Layout::Ops
 				insertIndex = targetIndex + 1;
 			}
 
-			parentSplit->insertChild(std::move(removed), 1.0f, insertIndex);
+			parentSplit->insertChild(std::move(removed), 200, false, insertIndex);
 			return true;
 		}
 
@@ -677,13 +677,13 @@ namespace WxDockUI::Layout::Ops
 			// Now insert the effective target and removed pane into the new split
 			if ((aEdge == DockPosition::Left) || (aEdge == DockPosition::Top))
 			{
-				newSplitRaw->insertChild(std::move(removed), 1.0f, 0);
-				newSplitRaw->insertChild(std::move(targetOwnership), 1.0f, 1);
+				newSplitRaw->insertChild(std::move(removed),         200, false, 0);
+				newSplitRaw->insertChild(std::move(targetOwnership), 200, true, 1);
 			}
 			else
 			{
-				newSplitRaw->insertChild(std::move(targetOwnership), 1.0f, 0);
-				newSplitRaw->insertChild(std::move(removed), 1.0f, 1);
+				newSplitRaw->insertChild(std::move(targetOwnership), 200, true, 0);
+				newSplitRaw->insertChild(std::move(removed),         200, false, 1);
 			}
 		}
 		else
@@ -695,13 +695,13 @@ namespace WxDockUI::Layout::Ops
 			// Insert effective target and removed pane into the split
 			if ((aEdge == DockPosition::Left) || (aEdge == DockPosition::Top))
 			{
-				newSplit->insertChild(std::move(removed), 1.0f, 0);
-				newSplit->insertChild(std::move(targetOwnership), 1.0f, 1);
+				newSplit->insertChild(std::move(removed),         200, false, 0);
+				newSplit->insertChild(std::move(targetOwnership), 200, true, 1);
 			}
 			else
 			{
-				newSplit->insertChild(std::move(targetOwnership), 1.0f, 0);
-				newSplit->insertChild(std::move(removed), 1.0f, 1);
+				newSplit->insertChild(std::move(targetOwnership), 200, true, 0);
+				newSplit->insertChild(std::move(removed),         200, false, 1);
 			}
 
 			static_cast<RootNode *>(parent)->setChild(std::move(newSplit));
@@ -807,38 +807,37 @@ namespace WxDockUI::Layout::Ops
 	Returns true if any modification was made. */
 	bool mergeSameOrientationSplits(SplitNode & aSplitNode)
 	{
-		bool hasChanged = false;
-		auto & children = const_cast<std::vector<SplitNode::SplitChild> &>(aSplitNode.children());
-		for (size_t i = 0; i < children.size();)  // Do not increment i here — we re-evaluate absorbed children as well
+		bool didMerge = false;
+		auto & children = aSplitNode.children();
+		for (size_t i = 0; i < children.size(); /* increment manually */)
 		{
-			auto * childSplit = children[i].mNode->asSplitNode();
+			auto & child = children[i];
+			auto * childSplit = dynamic_cast<SplitNode *>(child.mNode.get());
 			if ((childSplit == nullptr) || (childSplit->orientation() != aSplitNode.orientation()))
 			{
 				++i;
 				continue;
 			}
 
-			// Absorb this split:
-			auto parentRatio = children[i].mRatio;
-			auto ownedChildNode = aSplitNode.removeChild(static_cast<int>(i));
-			auto * absorbedSplit = ownedChildNode->asSplitNode();
-			assert(absorbedSplit != nullptr);
-			auto absorbedChildren = std::move(
-				const_cast<std::vector<SplitNode::SplitChild> &>(absorbedSplit->children())
-			);
+			// Move grandchildren into place of current child:
+			auto & grandChildren = childSplit->children();
 			size_t insertPos = i;
-			for (auto & grandChild: absorbedChildren)
+			for (auto & grandChild: grandChildren)
 			{
-				float newRatio = parentRatio * grandChild.mRatio;
-				aSplitNode.insertChild(std::move(grandChild.mNode), newRatio, insertPos);
+				SplitNode::SplitChild newChild;
+				newChild.mNode = std::move(grandChild.mNode);
+				newChild.mSizePx = grandChild.mSizePx;
+				newChild.mCanAbsorbResize = grandChild.mCanAbsorbResize;
+				children.insert(children.begin() + insertPos, std::move(newChild));
 				++insertPos;
 			}
-			hasChanged = true;
+			children.erase(children.begin() + insertPos);  // Erase the merged (now empty) split
+			didMerge = true;
+			i = insertPos;
 		}
 
-		return hasChanged;
+		return didMerge;
 	}
-
 
 
 
