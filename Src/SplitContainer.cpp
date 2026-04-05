@@ -145,6 +145,7 @@ namespace WxDockUI::Internal
 		// Clamp the pos between the two neighboring splitters:
 		auto pos = aEvent.GetPosition();
 		auto mousePos = (mSplitNode.orientation() == SplitOrientation::Horizontal) ? pos.x : pos.y;
+		mousePos -= SPLITTER_SIZE / 2;
 		int minPos = 0;
 		for (int idx = 0; idx < mDraggedSplitter; ++idx)
 		{
@@ -172,6 +173,7 @@ namespace WxDockUI::Internal
 			mSplitterRects[mDraggedSplitter].SetTop(mousePos);
 		}
 		updateLayout();
+		Refresh();
 		aEvent.Skip();
 	}
 
@@ -253,6 +255,14 @@ namespace WxDockUI::Internal
 
 	void SplitContainer::onSetCursor(wxSetCursorEvent & aEvent)
 	{
+		// If currently dragging a splitter, always use the sizing cursor:
+		if (mDraggedSplitter >= 0)
+		{
+			aEvent.SetCursor((mSplitNode.orientation() == SplitOrientation::Horizontal) ? wxCURSOR_SIZEWE : wxCURSOR_SIZENS);
+			return;
+		}
+
+		// Not dragging anything, set cursor only if within a splitter handle:
 		auto pos = ScreenToClient(wxGetMousePosition());
 		for (const auto & r: mSplitterRects)
 		{
