@@ -108,6 +108,8 @@ namespace WxDockUI
 	{
 		mDockSystem.registerManager(this);
 		mRoot.setChild(std::make_unique<Layout::TabNode>());
+
+		aFrame.Bind(wxEVT_SIZE, &FrameDockManager::onFrameSize, this);
 	}
 
 
@@ -120,6 +122,16 @@ namespace WxDockUI
 		mLayoutEngine.clear();
 		mPaneWindows.clear();
 		mPaneInfos.clear();
+	}
+
+
+
+
+
+	void FrameDockManager::onFrameSize(wxSizeEvent & aEvent)
+	{
+		aEvent.Skip();
+		updateLayout();
 	}
 
 

@@ -115,6 +115,10 @@ namespace WxDockUI
 		Internal::DragGhost * mDragGhost = nullptr;
 
 
+		/** Called by WX when mFrame is resized. Adjusts the layout to fill the frame. */
+		void onFrameSize(wxSizeEvent & aEvent);
+
+
 	public:
 
 		/** Creates a new instance of the manager bound to the specified frame,
