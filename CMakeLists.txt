@@ -15,6 +15,7 @@ set(srcs
 	Src/LayoutEngine.cpp
 	Src/LayoutOps.cpp
 	Src/PaneContainer.cpp
+	Src/PaneInfo.cpp
 	Src/PaneDragController.cpp
 	Src/SplitContainer.cpp
 	Src/TabContainer.cpp
@@ -22,22 +23,22 @@ set(srcs
 
 set(hdrs
 	# Interface headers:
-	Include/WxDockUI/DockSystem.h
-	Include/WxDockUI/Enums.h
-	Include/WxDockUI/FrameDockManager.h
-	Include/WxDockUI/WxDockUI.h
+	Include/WxDockUI/DockSystem.hpp
+	Include/WxDockUI/Enums.hpp
+	Include/WxDockUI/PaneInfo.hpp
 
 	# Internal headers:
-	Include/WxDockUI/Internal/DockOverlay.h
-	Include/WxDockUI/Internal/DockTarget.h
-	Include/WxDockUI/Internal/DragGhost.h
-	Include/WxDockUI/Internal/Layout.h
-	Include/WxDockUI/Internal/LayoutEngine.h
-	Include/WxDockUI/Internal/LayoutOps.h
-	Include/WxDockUI/Internal/PaneContainer.h
-	Include/WxDockUI/Internal/PaneDragController.h
-	Include/WxDockUI/Internal/SplitContainer.h
-	Include/WxDockUI/Internal/TabContainer.h
+	Include/WxDockUI/Internal/DockOverlay.hpp
+	Include/WxDockUI/Internal/DockTarget.hpp
+	Include/WxDockUI/Internal/DragGhost.hpp
+	Include/WxDockUI/Internal/FrameDockManager.hpp
+	Include/WxDockUI/Internal/Layout.hpp
+	Include/WxDockUI/Internal/LayoutEngine.hpp
+	Include/WxDockUI/Internal/LayoutOps.hpp
+	Include/WxDockUI/Internal/PaneContainer.hpp
+	Include/WxDockUI/Internal/PaneDragController.hpp
+	Include/WxDockUI/Internal/SplitContainer.hpp
+	Include/WxDockUI/Internal/TabContainer.hpp
 )
 
 # NOTE: shared library is disabled for now only for development comfort (QTCreator complains about multiple

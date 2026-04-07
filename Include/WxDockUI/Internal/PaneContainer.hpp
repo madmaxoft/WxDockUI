@@ -11,8 +11,10 @@
 // fwd:
 namespace WxDockUI
 {
-	class FrameDockManager;
-
+	namespace Internal
+	{
+		class FrameDockManager;
+	}
 	namespace Layout
 	{
 		class PaneNode;

@@ -1,5 +1,5 @@
-#include <WxDockUI/Internal/PaneContainer.h>
-#include <WxDockUI/FrameDockManager.h>
+#include <WxDockUI/Internal/PaneContainer.hpp>
+#include <WxDockUI/Internal/FrameDockManager.hpp>
 
 
 

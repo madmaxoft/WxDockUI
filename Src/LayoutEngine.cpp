@@ -1,9 +1,9 @@
-#include <WxDockUI/Internal/LayoutEngine.h>
-#include <WxDockUI/Internal/Layout.h>
-#include <WxDockUI/Internal/PaneContainer.h>
-#include <WxDockUI/Internal/SplitContainer.h>
-#include <WxDockUI/Internal/TabContainer.h>
-#include <WxDockUI/FrameDockManager.h>
+#include <WxDockUI/Internal/LayoutEngine.hpp>
+#include <WxDockUI/Internal/Layout.hpp>
+#include <WxDockUI/Internal/PaneContainer.hpp>
+#include <WxDockUI/Internal/SplitContainer.hpp>
+#include <WxDockUI/Internal/TabContainer.hpp>
+#include <WxDockUI/Internal/FrameDockManager.hpp>
 
 
 
@@ -210,7 +210,7 @@ namespace WxDockUI::Layout
 
 
 
-	LayoutEngine::LayoutEngine(WxDockUI::FrameDockManager & aFrameDockManager):
+	LayoutEngine::LayoutEngine(Internal::FrameDockManager & aFrameDockManager):
 		mFrameDockManager(aFrameDockManager)
 	{
 		#ifdef WXDOCKUI_DEBUG_LIFETIME

@@ -4,7 +4,7 @@
 
 #include <wx/frame.h>
 
-#include <WxDockUI/Internal/DockTarget.h>
+#include <WxDockUI/Internal/DockTarget.hpp>
 
 
 
@@ -13,7 +13,10 @@
 // fwd:
 namespace WxDockUI
 {
-	class FrameDockManager;
+	namespace Internal
+	{
+		class FrameDockManager;
+	}
 	namespace Layout
 	{
 		class BaseNode;

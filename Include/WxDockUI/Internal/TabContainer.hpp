@@ -13,7 +13,10 @@ class wxBoxSizer;
 
 namespace WxDockUI
 {
-	class FrameDockManager;
+	namespace Internal
+	{
+		class FrameDockManager;
+	}
 	namespace Layout
 	{
 		class TabNode;

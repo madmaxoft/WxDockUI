@@ -1,4 +1,4 @@
-#include <WxDockUI/Internal/Layout.h>
+#include <WxDockUI/Internal/Layout.hpp>
 #include <algorithm>
 #include <cassert>
 #include <iostream>

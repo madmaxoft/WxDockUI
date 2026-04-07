@@ -1,5 +1,5 @@
-#include <WxDockUI/Internal/LayoutOps.h>
-#include <WxDockUI/Internal/Layout.h>
+#include <WxDockUI/Internal/LayoutOps.hpp>
+#include <WxDockUI/Internal/Layout.hpp>
 
 #include <cassert>
 

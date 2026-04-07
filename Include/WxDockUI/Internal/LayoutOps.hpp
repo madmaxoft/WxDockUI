@@ -1,7 +1,7 @@
 #pragma once
 
-#include "WxDockUI/Enums.h"
-#include "Layout.h"
+#include <WxDockUI/Enums.hpp>
+#include <WxDockUI/Internal/Layout.hpp>
 
 
 

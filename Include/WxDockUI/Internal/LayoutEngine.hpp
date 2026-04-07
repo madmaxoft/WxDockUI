@@ -13,9 +13,9 @@
 // fwd:
 namespace WxDockUI
 {
-	class FrameDockManager;
 	namespace Internal
 	{
+		class FrameDockManager;
 		class PaneContainer;
 		class SplitContainer;
 		class TabContainer;
@@ -51,7 +51,7 @@ namespace WxDockUI::Layout
 
 
 		/** The FrameDockManager responsible for handling all the PaneContainers created by this class. */
-		WxDockUI::FrameDockManager & mFrameDockManager;
+		Internal::FrameDockManager & mFrameDockManager;
 
 		/** The PaneContainer instances created by this layout engine in mFrameDockManager. */
 		std::unordered_map<const PaneNode *, std::unique_ptr<Internal::PaneContainer>> mPaneContainers;
@@ -104,7 +104,7 @@ namespace WxDockUI::Layout
 	public:
 
 		/** Creates a new instance bound to the specified FraomeDockManager. */
-		explicit LayoutEngine(WxDockUI::FrameDockManager & aFrameDockManager);
+		explicit LayoutEngine(Internal::FrameDockManager & aFrameDockManager);
 
 		/** Destroys the instance. */
 		~LayoutEngine();

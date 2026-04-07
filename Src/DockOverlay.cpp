@@ -1,7 +1,7 @@
-#include <WxDockUI/Internal/DockOverlay.h>
-#include <WxDockUI/Internal/PaneContainer.h>
-#include <WxDockUI/Internal/TabContainer.h>
-#include <WxDockUI/FrameDockManager.h>
+#include <WxDockUI/Internal/DockOverlay.hpp>
+#include <WxDockUI/Internal/PaneContainer.hpp>
+#include <WxDockUI/Internal/TabContainer.hpp>
+#include <WxDockUI/Internal/FrameDockManager.hpp>
 #include <wx/dcbuffer.h>
 
 

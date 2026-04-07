@@ -1,9 +1,9 @@
-#include <WxDockUI/Internal/TabContainer.h>
+#include <WxDockUI/Internal/TabContainer.hpp>
 
 #include <unordered_set>
 
-#include <WxDockUI/FrameDockManager.h>
-#include <WxDockUI/Internal/PaneContainer.h>
+#include <WxDockUI/Internal/FrameDockManager.hpp>
+#include <WxDockUI/Internal/PaneContainer.hpp>
 
 
 

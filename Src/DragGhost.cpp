@@ -1,4 +1,4 @@
-#include "WxDockUI/Internal/DragGhost.h"
+#include "WxDockUI/Internal/DragGhost.hpp"
 
 
 

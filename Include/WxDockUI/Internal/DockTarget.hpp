@@ -4,8 +4,8 @@
 #include <format>
 #include <cassert>
 
-#include <WxDockUI/Enums.h>
-#include <WxDockUI/Internal/Layout.h>
+#include <WxDockUI/Enums.hpp>
+#include <WxDockUI/Internal/Layout.hpp>
 
 
 

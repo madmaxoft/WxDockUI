@@ -1,112 +1,24 @@
-#include <WxDockUI/FrameDockManager.h>
-#include <WxDockUI/DockSystem.h>
-#include <WxDockUI/Internal/LayoutOps.h>
+#include <WxDockUI/Internal/FrameDockManager.hpp>
+#include <WxDockUI/Internal/LayoutOps.hpp>
 
 
 
 
 
-namespace WxDockUI
+namespace WxDockUI::Internal
 {
 
 
 
 
 
-	///////////////////////////////////////////////////////////////////////////////
-	// PaneInfo:
-
-	PaneInfo::PaneInfo(const PaneId & aPaneId):
-		mPaneId(aPaneId)
-	{
-	}
-
-
-
-
-
-	PaneInfo & PaneInfo::caption(const wxString & aCaption)
-	{
-		mCaption = aCaption;
-		return *this;
-	}
-
-
-
-
-
-	PaneInfo & PaneInfo::left()
-	{
-		mInitialDock = DockPosition::Left;
-		return *this;
-	}
-
-
-
-
-
-	PaneInfo & PaneInfo::right()
-	{
-		mInitialDock = DockPosition::Right;
-		return *this;
-	}
-
-
-
-
-
-	PaneInfo & PaneInfo::bottom()
-	{
-		mInitialDock = DockPosition::Bottom;
-		return *this;
-	}
-
-
-
-
-
-	PaneInfo & PaneInfo::top()
-	{
-		mInitialDock = DockPosition::Top;
-		return *this;
-	}
-
-
-
-
-
-	PaneInfo & PaneInfo::center()
-	{
-		mInitialDock = DockPosition::Center;
-		return *this;
-	}
-
-
-
-
-
-	PaneInfo & PaneInfo::bestSize(int aWidth, int aHeight)
-	{
-		mBestWidth = aWidth;
-		mBestHeight = aHeight;
-		return *this;
-	}
-
-
-
-
-
-	///////////////////////////////////////////////////////////////////////////////
-	// FrameDockManager:
-
-	FrameDockManager::FrameDockManager(wxFrame & aFrame, DockSystem & aDockSystem):
+	FrameDockManager::FrameDockManager(wxTopLevelWindow & aFrame, DockSystem & aDockSystem):
 		mLayoutEngine(*this),
 		mPaneDragController(*this),
 		mDockOverlay(*this),
 		mDockSystem(aDockSystem),
 		mFrame(aFrame)
 	{
-		mDockSystem.registerManager(this);
 		mRoot.setChild(std::make_unique<Layout::TabNode>());
 
 		aFrame.Bind(wxEVT_SIZE, &FrameDockManager::onFrameSize, this);
@@ -118,10 +30,7 @@ namespace WxDockUI
 
 	FrameDockManager::~FrameDockManager()
 	{
-		mDockSystem.unregisterManager(this);
 		mLayoutEngine.clear();
-		mPaneWindows.clear();
-		mPaneInfos.clear();
 	}
 
 
@@ -138,15 +47,10 @@ namespace WxDockUI
 
 
 
-	void FrameDockManager::addPane(wxWindow * aWindow, const PaneInfo & aOptions)
+	void FrameDockManager::addPane(const PaneId & aPaneId, const PaneInfo & aOptions)
 	{
-		// Register the pane:
-		mPaneWindows[aOptions.paneId()] = aWindow;
-		mPaneInfos[aOptions.paneId()] = aOptions;
-		// TODO: Check if such a pane ID already exists
-
 		// Add the pane to the layout:
-		auto paneNode = std::make_unique<Layout::PaneNode>(aOptions.paneId());
+		auto paneNode = std::make_unique<Layout::PaneNode>(aPaneId);
 		if (aOptions.initialDock() == DockPosition::Center)
 		{
 			Layout::Ops::insertCenterPane(mRoot, std::move(paneNode));
@@ -181,43 +85,6 @@ namespace WxDockUI
 	void FrameDockManager::dumpLayout(std::ostream & aOut) const
 	{
 		mRoot.dump(aOut, 1);
-	}
-
-
-
-
-
-	wxWindow * FrameDockManager::findPaneWindow(const PaneId & aId) const
-	{
-		auto itr = mPaneWindows.find(aId);
-		if (itr == mPaneWindows.end())
-		{
-			return nullptr;
-		}
-		return itr->second;
-	}
-
-
-
-
-
-	wxWindow * FrameDockManager::findPaneWindow(const Layout::PaneNode & aPaneNode) const
-	{
-		return findPaneWindow(aPaneNode.paneId());
-	}
-
-
-
-
-
-	const PaneInfo * FrameDockManager::findPaneInfo(const PaneId & aId)
-	{
-		auto itr = mPaneInfos.find(aId);
-		if (itr == mPaneInfos.end())
-		{
-			return nullptr;
-		}
-		return &(itr->second);
 	}
 
 

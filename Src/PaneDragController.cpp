@@ -1,7 +1,7 @@
-#include <WxDockUI/Internal/PaneDragController.h>
-#include <WxDockUI/Internal/PaneContainer.h>
-#include <WxDockUI/Internal/TabContainer.h>
-#include <WxDockUI/FrameDockManager.h>
+#include <WxDockUI/Internal/PaneDragController.hpp>
+#include <WxDockUI/Internal/PaneContainer.hpp>
+#include <WxDockUI/Internal/TabContainer.hpp>
+#include <WxDockUI/Internal/FrameDockManager.hpp>
 
 
 
@@ -14,7 +14,7 @@ namespace WxDockUI::Internal
 
 
 
-	PaneDragController::PaneDragController(WxDockUI::FrameDockManager & aFrameDockManager):
+	PaneDragController::PaneDragController(FrameDockManager & aFrameDockManager):
 		mFrameDockManager(aFrameDockManager)
 	{
 	}

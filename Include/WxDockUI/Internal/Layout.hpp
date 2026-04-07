@@ -5,7 +5,7 @@
 #include <memory>
 #include <ostream>
 
-#include "WxDockUI/Enums.h"
+#include "WxDockUI/Enums.hpp"
 
 
 

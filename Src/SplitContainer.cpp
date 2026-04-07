@@ -1,9 +1,9 @@
-#include <WxDockUI/Internal/SplitContainer.h>
+#include <WxDockUI/Internal/SplitContainer.hpp>
 
 #include <wx/dcbuffer.h>
 
-#include <WxDockUI/FrameDockManager.h>
-#include <WxDockUI/Internal/Layout.h>
+#include <WxDockUI/Internal/FrameDockManager.hpp>
+#include <WxDockUI/Internal/Layout.hpp>
 
 
 

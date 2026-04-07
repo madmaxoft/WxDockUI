@@ -1,9 +1,9 @@
 #pragma once
 
-#include <optional>
+// #include <optional>
 
-#include <WxDockUI/Internal/DockTarget.h>
-#include <WxDockUI/Internal/DragGhost.h>
+#include <WxDockUI/Internal/DockTarget.hpp>
+#include <WxDockUI/Internal/DragGhost.hpp>
 
 #include <wx/wx.h>
 
@@ -14,9 +14,9 @@
 // fwd:
 namespace WxDockUI
 {
-	class FrameDockManager;
 	namespace Internal
 	{
+		class FrameDockManager;
 		class PaneContainer;
 	}
 }
@@ -42,7 +42,7 @@ namespace WxDockUI::Internal
 		nullptr if not dragging anything. */
 		const Layout::PaneNode * mDraggedPane = nullptr;
 
-		std::optional<WxDockUI::Internal::DockTarget> mCurrentTarget;
+		std::optional<DockTarget> mCurrentTarget;
 
 		/** The ghost used to visualise dragging a pane around. */
 		Internal::DragGhost * mDragGhost = nullptr;
@@ -50,7 +50,7 @@ namespace WxDockUI::Internal
 
 	public:
 
-		explicit PaneDragController(WxDockUI::FrameDockManager & aFrameDockManager);
+		explicit PaneDragController(FrameDockManager & aFrameDockManager);
 
 		bool isDragging() const;
 

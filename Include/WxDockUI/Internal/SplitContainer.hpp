@@ -1,6 +1,6 @@
 #pragma once
 
-#include <memory>
+#include <vector>
 #include <wx/panel.h>
 
 
@@ -10,7 +10,10 @@
 // fwd:
 namespace WxDockUI
 {
-	class FrameDockManager;
+	namespace Internal
+	{
+		class FrameDockManager;
+	}
 	namespace Layout
 	{
 		class SplitNode;
