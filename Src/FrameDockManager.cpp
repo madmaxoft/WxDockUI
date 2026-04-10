@@ -14,7 +14,6 @@ namespace WxDockUI::Internal
 
 	FrameDockManager::FrameDockManager(wxTopLevelWindow & aFrame, DockSystem & aDockSystem):
 		mLayoutEngine(*this),
-		mPaneDragController(*this),
 		mDockOverlay(*this),
 		mDockSystem(aDockSystem),
 		mFrame(aFrame)
@@ -91,104 +90,6 @@ namespace WxDockUI::Internal
 
 
 
-	void FrameDockManager::performDock(const Layout::PaneNode & aDraggedPane, const Internal::DockTarget & aTarget)
-	{
-		if (!aTarget.isValid())
-		{
-			return;
-		}
-
-		const std::string & paneId = aDraggedPane.paneId();
-		bool didMove = false;
-		#ifdef WXDOCKUI_DUMP_LAYOUT_ON_DOCK
-			std::cout << "Performing a dock of pane \"" << paneId << "\" into target " << aTarget.describe() << std::endl;
-			std::cout << "Layout before the dock:" << std::endl;
-			dumpLayout(std::cout);
-		#endif
-		if (aTarget.isRootSplit())
-		{
-			auto pos = aTarget.dockPosition();
-			auto pane = Layout::Ops::removePane(mRoot, paneId);
-			if (pane.get() == nullptr)
-			{
-				return;
-			}
-			auto clientRect = mFrame.GetClientRect();
-			auto sizePx = aTarget.isHorizontalSplit() ? (clientRect.width / 5) : (clientRect.height / 5);
-			Layout::Ops::insertEdgePane(mRoot, std::move(pane), pos, sizePx);
-			didMove = true;
-		}
-		else if (aTarget.isPaneSplit())
-		{
-			if (aTarget.mNode == nullptr)
-			{
-				return;
-			}
-			if (aTarget.mNode == &aDraggedPane)
-			{
-				auto tab = aTarget.mNode->parent()->asTabNode();
-				if (
-					(tab == nullptr) ||         // The target pane is not within a tab
-					(tab->panes().size() == 1)  // The source pane is the last pane in a tab
-				)
-				{
-					return;
-				}
-			}
-			auto pos = aTarget.dockPosition();
-			didMove = Layout::Ops::movePaneToNodeEdge(mRoot, paneId, const_cast<Layout::BaseNode &>(*aTarget.mNode), pos);
-		}
-		else if (aTarget.mKind == Internal::DockTarget::Kind::PaneTab)
-		{
-			if ((aTarget.mNode == nullptr) || (aTarget.mNode == &aDraggedPane))
-			{
-				return;
-			}
-			switch (aTarget.mNode->type())
-			{
-				case Layout::NodeType::Pane:
-				{
-					didMove = Layout::Ops::mergePanesIntoTab(mRoot, paneId, aTarget.mNode->asPaneNode()->paneId(), -1);
-					break;
-				}
-				case Layout::NodeType::Tab:
-				{
-					auto tabNode = aTarget.mNode->asTabNode();
-					didMove = Layout::Ops::movePaneToTab(mRoot, paneId, const_cast<Layout::TabNode &>(*tabNode), 0);
-					break;
-				}
-				default:
-				{
-					assert(!"Unhandled node type");
-					break;
-				}
-			}
-		}
-		if (!didMove)
-		{
-			return;
-		}
-
-		Layout::Ops::cleanup(mRoot);
-
-		#ifdef WXDOCKUI_DUMP_LAYOUT_ON_DOCK
-			std::cout << "Layout after the dock:" << std::endl;
-			dumpLayout(std::cout);
-			std::flush(std::cout);
-			Layout::Ops::validateLayoutTree(mRoot, &std::cerr);
-		#endif
-
-		// Call updateLayout after processing all events, since this performDock call is most likely called
-		// from within an event handler for an object that could get destroyed by the re-layout
-		mFrame.CallAfter([this](){
-			updateLayout();
-		});
-	}
-
-
-
-
-
 	void FrameDockManager::uncaptureMouse()
 	{
 		auto captured = mFrame.GetCapture();
@@ -196,6 +97,55 @@ namespace WxDockUI::Internal
 		{
 			captured->ReleaseMouse();
 		}
+	}
+
+
+
+
+
+	void FrameDockManager::beginDrag(const Layout::PaneNode * aPane, const wxPoint & aScreenPos)
+	{
+		return mDockSystem.paneDragController().beginDrag(*this, aPane, aScreenPos);
+	}
+
+
+
+
+
+	void FrameDockManager::updateDrag(const wxPoint & aScreenPos)
+	{
+		return mDockSystem.paneDragController().updateDrag(aScreenPos);
+	}
+
+
+
+
+
+	void FrameDockManager::endDrag(const wxPoint & aScreenPos)
+	{
+		return mDockSystem.paneDragController().endDrag(aScreenPos);
+	}
+
+
+
+
+
+	void FrameDockManager::cancelDrag()
+	{
+		return mDockSystem.paneDragController().cancelDrag();
+	}
+
+
+
+
+
+	void FrameDockManager::performDock(
+		FrameDockManager & aSourceFrame,
+		const Layout::PaneNode & aDraggedPane,
+		const DockTarget & aTarget
+	)
+	{
+		mDockSystem.performDock(aSourceFrame, aDraggedPane, aTarget);
 	}
 
 

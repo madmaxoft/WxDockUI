@@ -3,6 +3,8 @@
 #include <memory>
 #include <wx/wx.h>
 #include <WxDockUI/PaneInfo.hpp>
+#include <WxDockUI/Internal/PaneDragController.hpp>
+#include <WxDockUI/Internal/ZOrderTracker.hpp>
 
 
 
@@ -30,11 +32,37 @@ namespace WxDockUI
 	can be moved around. */
 	class DockSystem
 	{
+		friend class Internal::FrameDockManager;
+		friend class Internal::PaneDragController;
+
 		/** All the managed windows, wrapped in a FrameDockManager instance. */
 		std::vector<std::unique_ptr<Internal::FrameDockManager>> mManagedWindows;
 
 		/** Mapping from pane IDs to the pane info and actual wxWidget windows for the pane. */
 		std::unordered_map<PaneId, std::pair<PaneInfo, wxWindow *>> mPanes;
+
+		/** The controller responsible for handling dragging panes around. */
+		Internal::PaneDragController mPaneDragController;
+
+		/** Tracker for the Z-order of all mManagedWindows. Used for hit-testing while dragging a pane. */
+		Internal::ZOrderTracker mZOrderTracker;
+
+
+		/** Returns the target frame for a dock operation, creating a new one if needed (-> floating) */
+		Internal::FrameDockManager & ensureDockTargetFrame(const Internal::DockTarget & aDockTarget);
+
+		/** Docks the specified dragged pane into the specified target. */
+		void performDock(
+			Internal::FrameDockManager & aSourceFrame,
+			const Layout::PaneNode & aDraggedPane,
+			const Internal::DockTarget & aTarget
+		);
+
+		Internal::PaneDragController & paneDragController() { return mPaneDragController; }
+
+		/** Returns the managed window that is visible at the specified screen position.
+		Returns nullptr if none. */
+		Internal::FrameDockManager * managedWindowAtScreenPos(const wxPoint & aScreenPos);
 
 
 	public:
@@ -63,6 +91,7 @@ namespace WxDockUI
 
 		/** Returns the PaneInfo for the specified pane, or nullptr if no such pane. */
 		const PaneInfo * findPaneInfo(const PaneId & aPaneId) const;
+
 	};
 
 

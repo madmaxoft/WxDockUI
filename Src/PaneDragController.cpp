@@ -14,8 +14,8 @@ namespace WxDockUI::Internal
 
 
 
-	PaneDragController::PaneDragController(FrameDockManager & aFrameDockManager):
-		mFrameDockManager(aFrameDockManager)
+	PaneDragController::PaneDragController(DockSystem & aDockSystem):
+		mDockSystem(aDockSystem)
 	{
 	}
 
@@ -25,21 +25,27 @@ namespace WxDockUI::Internal
 
 	bool PaneDragController::isDragging() const
 	{
-		return (mDraggedPane != nullptr);
+		return ((mSourceFrame != nullptr) && (mDraggedPane != nullptr));
 	}
 
 
 
 
 
-	void PaneDragController::beginDrag(const Layout::PaneNode * aPane, const wxPoint & aScreenPos)
+	void PaneDragController::beginDrag(
+		FrameDockManager & aSourceFrame,
+		const Layout::PaneNode * aDraggedPane,
+		const wxPoint & aScreenPos
+	)
 	{
-		if (aPane == nullptr)
+		assert(!isDragging());
+		if (aDraggedPane == nullptr)
 		{
 			return;
 		}
-		mDraggedPane = aPane;
-		mFrameDockManager.dockOverlay().setCurrentDragNode(mDraggedPane);
+		mSourceFrame = &aSourceFrame;
+		mDraggedPane = aDraggedPane;
+		aSourceFrame.dockOverlay().setCurrentDragNode(mDraggedPane);
 		mCurrentTarget.reset();
 		updateUI(aScreenPos);
 	}
@@ -48,7 +54,7 @@ namespace WxDockUI::Internal
 
 
 
-	void PaneDragController::updateDrag(const Layout::PaneNode * aPane, const wxPoint & aScreenPos)
+	void PaneDragController::updateDrag(const wxPoint & aScreenPos)
 	{
 		if (!isDragging())
 		{
@@ -56,7 +62,28 @@ namespace WxDockUI::Internal
 			return;
 		}
 
-		auto target = mFrameDockManager.dockOverlay().hitTest(aScreenPos);
+		// Check if targeting the same frame, if not, update mTargetFrame:
+		auto targetFrame = mDockSystem.managedWindowAtScreenPos(aScreenPos);
+		if (targetFrame == nullptr)
+		{
+			// TODO: Indicate floating
+			mCurrentTarget.reset();
+			updateUI(aScreenPos);
+			return;
+		}
+		if ((mTargetFrame == nullptr) || (targetFrame != mTargetFrame))
+		{
+			if (mTargetFrame != nullptr)
+			{
+				mTargetFrame->dockOverlay().showOverlay(false);
+			}
+			mTargetFrame = targetFrame;
+			mTargetFrame->dockOverlay().setCurrentDragNode(mDraggedPane);
+			mTargetFrame->dockOverlay().showOverlay(true);
+			mTargetFrame->frame()->Raise();
+		}
+
+		auto target = mTargetFrame->dockOverlay().hitTest(aScreenPos);
 		if (!target.isValid())
 		{
 			mCurrentTarget.reset();
@@ -79,7 +106,7 @@ namespace WxDockUI::Internal
 
 
 
-	void PaneDragController::endDrag(const Layout::PaneNode * aPane, const wxPoint & aScreenPos)
+	void PaneDragController::endDrag(const wxPoint & aScreenPos)
 	{
 		if (!isDragging())
 		{
@@ -87,13 +114,14 @@ namespace WxDockUI::Internal
 			return;
 		}
 
-		updateDrag(aPane, aScreenPos);
+		// Finalize any remaining mouse movement:
+		updateDrag(aScreenPos);
 
 		if (mCurrentTarget.has_value())
 		{
 			// Hide the overlay early so that it doesn't cover the debugger:
-			mFrameDockManager.dockOverlay().showOverlay(false);
-			mFrameDockManager.performDock(*mDraggedPane, mCurrentTarget.value());
+			mTargetFrame->dockOverlay().showOverlay(false);
+			mTargetFrame->performDock(*mSourceFrame, *mDraggedPane, mCurrentTarget.value());
 		}
 
 		clearState();
@@ -103,7 +131,7 @@ namespace WxDockUI::Internal
 
 
 
-	void PaneDragController::cancelDrag(const Layout::PaneNode * aPane)
+	void PaneDragController::cancelDrag()
 	{
 		if (!isDragging())
 		{
@@ -122,7 +150,12 @@ namespace WxDockUI::Internal
 		// Reset the source and target:
 		mDraggedPane = nullptr;
 		mCurrentTarget.reset();
-		mFrameDockManager.dockOverlay().setCurrentDragNode(nullptr);
+		if (mTargetFrame != nullptr)
+		{
+			mTargetFrame->dockOverlay().Hide();
+			mTargetFrame->dockOverlay().setCurrentDragNode(nullptr);
+			mTargetFrame = nullptr;
+		}
 
 		updateUI(wxGetMousePosition());
 	}
@@ -142,8 +175,12 @@ namespace WxDockUI::Internal
 				mDragGhost->Raise();
 			}
 			moveDragGhostToTarget(aScreenPos);
-			mFrameDockManager.dockOverlay().updateMousePosition(aScreenPos);
-			mFrameDockManager.dockOverlay().showOverlay(true);
+			if (mTargetFrame != nullptr)
+			{
+				mTargetFrame->dockOverlay().setCurrentDragNode(mDraggedPane);
+				mTargetFrame->dockOverlay().updateMousePosition(aScreenPos);
+				mTargetFrame->dockOverlay().showOverlay(true);
+			}
 		}
 		else
 		{
@@ -153,7 +190,6 @@ namespace WxDockUI::Internal
 				delete mDragGhost;
 				mDragGhost = nullptr;
 			}
-			mFrameDockManager.dockOverlay().showOverlay(false);
 		}
 	}
 
@@ -233,11 +269,12 @@ namespace WxDockUI::Internal
 
 	void PaneDragController::moveDragGhostToTargetPane(int aTopPercent, int aLeftPercent, int aBottomPercent, int aRightPercent)
 	{
+		assert(mTargetFrame != nullptr);
 		wxWindow * wnd;
 		auto parentNode = mCurrentTarget.value().mNode->parent();
 		if (parentNode->type() == WxDockUI::Layout::NodeType::Tab)
 		{
-			wnd = mFrameDockManager.layoutEngine().ensureTabContainer(parentNode->asTabNode());
+			wnd = mTargetFrame->layoutEngine().ensureTabContainer(parentNode->asTabNode());
 		}
 		else
 		{
@@ -247,12 +284,12 @@ namespace WxDockUI::Internal
 				{
 					auto pane = mCurrentTarget.value().mNode->asPaneNode();
 					assert(pane != nullptr);
-					wnd = mFrameDockManager.findPaneWindow(*pane);
+					wnd = mDockSystem.findPaneWindow(pane->paneId());
 					break;
 				}
 				case Layout::NodeType::Tab:
 				{
-					wnd = mFrameDockManager.layoutEngine().maybeTabContainer(mCurrentTarget.value().mNode->asTabNode());
+					wnd = mTargetFrame->layoutEngine().maybeTabContainer(mCurrentTarget.value().mNode->asTabNode());
 					break;
 				}
 				default:
@@ -283,7 +320,8 @@ namespace WxDockUI::Internal
 
 	void PaneDragController::moveDragGhostToTargetRoot(int aTopPercent, int aLeftPercent, int aBottomPercent, int aRightPercent)
 	{
-		auto frame = mFrameDockManager.frame();
+		assert(mTargetFrame != nullptr);
+		auto frame = mTargetFrame->frame();
 		wxRect clientRect = frame->GetClientRect();
 		wxPoint clientTopLeftScreen = frame->ClientToScreen(clientRect.GetTopLeft());
 		wxRect clientScreenRect(

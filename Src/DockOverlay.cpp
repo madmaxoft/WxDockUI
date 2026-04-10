@@ -115,6 +115,7 @@ namespace WxDockUI::Internal
 			{
 				result.mKind = kind;
 				result.mNode = mHoveredNode;
+				result.mTargetFrame = &mFrameDockManager;
 				return result;
 			}
 		}

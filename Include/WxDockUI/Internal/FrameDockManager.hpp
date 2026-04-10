@@ -46,9 +46,6 @@ namespace WxDockUI::Internal
 		/** The layout engine used to manager the layout of the panes. */
 		WxDockUI::Layout::LayoutEngine mLayoutEngine;
 
-		/** The controller responsible for handling dragging panes around. */
-		PaneDragController mPaneDragController;
-
 		/** The overlay showing the dock icons and performing hit-testing on them. */
 		DockOverlay mDockOverlay;
 
@@ -59,7 +56,7 @@ namespace WxDockUI::Internal
 		WxDockUI::DockSystem & mDockSystem;
 
 		/** The ghost used to visualise dragging a pane around. */
-		Internal::DragGhost * mDragGhost = nullptr;
+		DragGhost * mDragGhost = nullptr;
 
 
 		/** Called by WX when mFrame is resized. Adjusts the layout to fill the frame. */
@@ -88,11 +85,11 @@ namespace WxDockUI::Internal
 		Note that the format is directly usable to build a layout tree in a test in LayoutOpsTest.cpp. */
 		void dumpLayout(std::ostream & aOut) const;
 
-		// Getters for the specific action engines / controllers:
-		WxDockUI::DockSystem & dockSystem() { return mDockSystem; }
+		// Getters:
 		WxDockUI::Layout::LayoutEngine & layoutEngine() { return mLayoutEngine; }
-		WxDockUI::Internal::PaneDragController & paneDragController() { return mPaneDragController; }
 		WxDockUI::Internal::DockOverlay & dockOverlay() { return mDockOverlay; }
+		WxDockUI::Layout::RootNode & rootNode() { return mRoot; }
+		WxDockUI::DockSystem & dockSystem() { return mDockSystem; }
 
 		wxTopLevelWindow * frame() const { return &mFrame; }
 
@@ -105,11 +102,27 @@ namespace WxDockUI::Internal
 		/** Returns the PaneInfo for the specified pane, or nullptr if no such pane. */
 		const PaneInfo * findPaneInfo(const PaneId & aPaneId) const { return mDockSystem.findPaneInfo(aPaneId); }
 
-		/** Internal: Performs the dock operation on aDraggedPane specified by the target. */
-		void performDock(const Layout::PaneNode & aDraggedPane, const Internal::DockTarget & aTarget);
-
-		/** Internal: Call this before an expected breakpoint to allow the debugger / IDE to use the mouse. */
+		/** Call this before an expected breakpoint to allow the debugger / IDE to use the mouse. */
 		void uncaptureMouse();
+
+		/** Called upon starting a drag operation from this frame. Relays to mDockSystem's beginDrag(). */
+		void beginDrag(const Layout::PaneNode * aPane, const wxPoint & aScreenPos);
+
+		/** Called for updating a drag operation targeting this frame. Relays to mDockSystem's updateDrag(). */
+		void updateDrag(const wxPoint & aScreenPos);
+
+		/** Called to end a drag operation in this frame. Relays to mDockSystem's endDrag(). */
+		void endDrag(const wxPoint & aScreenPos);
+
+		/** Called to cancel a drag operation in this frame. Relays to mDockSystem's cancelDrag(). */
+		void cancelDrag();
+
+		/** Docks the specified dragged pane into the specified target. Relays to mDockSystem's performDock(). */
+		void performDock(
+			Internal::FrameDockManager & aSourceFrame,
+			const Layout::PaneNode & aDraggedPane,
+			const Internal::DockTarget & aTarget
+		);
 	};
 
 

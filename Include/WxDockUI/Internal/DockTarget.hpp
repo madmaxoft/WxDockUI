@@ -17,6 +17,12 @@ namespace WxDockUI::Internal
 
 
 
+	// fwd:
+	class FrameDockManager;
+
+
+
+
 
 	/** Describes the target for a dock operation. */
 	struct DockTarget
@@ -35,7 +41,13 @@ namespace WxDockUI::Internal
 			PaneTab
 		} mKind = Kind::Invalid;
 
+		/** The FrameDockManager into which the node should be docked.
+		If nullptr, the pane should be floated. */
+		const FrameDockManager * mTargetFrame = nullptr;
+
+		/** The node determining the anchor for mKind (when PaneSplit). */
 		const WxDockUI::Layout::BaseNode * mNode = nullptr;
+
 
 		bool isValid() const
 		{

@@ -19,6 +19,7 @@ set(srcs
 	Src/PaneDragController.cpp
 	Src/SplitContainer.cpp
 	Src/TabContainer.cpp
+	Src/ZOrderTracker.cpp
 )
 
 set(hdrs
@@ -39,6 +40,7 @@ set(hdrs
 	Include/WxDockUI/Internal/PaneDragController.hpp
 	Include/WxDockUI/Internal/SplitContainer.hpp
 	Include/WxDockUI/Internal/TabContainer.hpp
+	Include/WxDockUI/Internal/ZOrderTracker.hpp
 )
 
 # NOTE: shared library is disabled for now only for development comfort (QTCreator complains about multiple

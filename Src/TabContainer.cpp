@@ -190,7 +190,7 @@ namespace WxDockUI::Internal
 
 		if (mDraggedPane != nullptr)
 		{
-			mFrameDockManager.paneDragController().updateDrag(mDraggedPane, wxGetMousePosition());
+			mFrameDockManager.updateDrag(wxGetMousePosition());
 		}
 		else if (mIsDraggingTab)
 		{
@@ -220,7 +220,7 @@ namespace WxDockUI::Internal
 			ReleaseMouse();
 		}
 
-		mFrameDockManager.paneDragController().endDrag(mDraggedPane, wxGetMousePosition());
+		mFrameDockManager.endDrag(wxGetMousePosition());
 		mIsDraggingTab = false;
 		mDragTabIndex = wxNOT_FOUND;
 		mDraggedPane = nullptr;
@@ -247,7 +247,7 @@ namespace WxDockUI::Internal
 		{
 			return;
 		}
-		mFrameDockManager.paneDragController().beginDrag(mDraggedPane, mDragStartScreenPos);
+		mFrameDockManager.beginDrag(mDraggedPane, mDragStartScreenPos);
 	}
 
 
