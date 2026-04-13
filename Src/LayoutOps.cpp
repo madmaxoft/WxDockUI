@@ -803,16 +803,25 @@ namespace WxDockUI::Layout::Ops
 
 
 
-	/** Merges child SplitNodes that have the same orientation as aNode.
-	Returns true if any modification was made. */
 	bool mergeSameOrientationSplits(SplitNode & aSplitNode)
 	{
+		// First recurse into children:
+		for (auto & ch: aSplitNode.children())
+		{
+			auto * childSplit = ch.mNode->asSplitNode();
+			if (childSplit != nullptr)
+			{
+				mergeSameOrientationSplits(*childSplit);
+			}
+		}
+
+		// Merge direct children:
 		bool didMerge = false;
 		auto & children = aSplitNode.children();
 		for (size_t i = 0; i < children.size(); /* increment manually */)
 		{
 			auto & child = children[i];
-			auto * childSplit = dynamic_cast<SplitNode *>(child.mNode.get());
+			auto * childSplit = child.mNode->asSplitNode();
 			if ((childSplit == nullptr) || (childSplit->orientation() != aSplitNode.orientation()))
 			{
 				++i;
@@ -828,6 +837,7 @@ namespace WxDockUI::Layout::Ops
 				newChild.mNode = std::move(grandChild.mNode);
 				newChild.mSizePx = grandChild.mSizePx;
 				newChild.mCanAbsorbResize = grandChild.mCanAbsorbResize;
+				newChild.mNode->setParent(&aSplitNode);
 				children.insert(children.begin() + insertPos, std::move(newChild));
 				++insertPos;
 			}
@@ -914,9 +924,5 @@ namespace WxDockUI::Layout::Ops
 	{
 		return validateNode(aRoot, nullptr, aLog);
 	}
-
-
-
-
 
 }  // namespace WxDockUI::Layout::Ops

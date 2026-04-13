@@ -71,7 +71,7 @@ namespace WxDockUI::Layout::Ops
 	Returns nullptr on error (pane not found). */
 	TabNode * wrapPaneInTab(RootNode & aRoot, const std::string & aPaneId);
 
-	/** Merges child SplitNodes that have the same orientation as aNode.
+	/** Recursively merges child SplitNodes that have the same orientation as aNode.
 	Returns true if any modification was made. */
 	bool mergeSameOrientationSplits(SplitNode & aSplitNode);
 
