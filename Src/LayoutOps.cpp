@@ -586,7 +586,28 @@ namespace WxDockUI::Layout::Ops
 		int aInsertIndex
 	)
 	{
-		auto removed = removePane(aRoot, aPaneId);
+		return movePaneToTab(aRoot, aPaneId, aRoot, aTargetTabNode, aInsertIndex);
+	}
+
+
+
+
+
+	bool movePaneToTab(
+		RootNode & aSourceRoot,
+		const std::string & aPaneId,
+		RootNode & aTargetRoot,
+		TabNode & aTargetTabNode,
+		int aInsertIndex
+	)
+	{
+		assert(findPaneNodeRecursive(aSourceRoot, aPaneId) != nullptr);  // Pane must be in the source
+		if (&aSourceRoot != &aTargetRoot)
+		{
+			assert(findPaneNodeRecursive(aTargetRoot, aPaneId) == nullptr);  // Pane must not already be in the target
+		}
+
+		auto removed = removePane(aSourceRoot, aPaneId);
 		if (removed == nullptr)
 		{
 			return false;
@@ -616,18 +637,32 @@ namespace WxDockUI::Layout::Ops
 		WxDockUI::DockPosition aEdge
 	)
 	{
-		auto orientation = orientationForEdge(aEdge);
-		auto parent = aTargetNode.parent();
-		assert(parent != nullptr);  // Cannot replace the root itself
+		return movePaneToNodeEdge(aRoot, aPaneId, aRoot, aTargetNode, aEdge);
+	}
 
-		auto removed = removePane(aRoot, aPaneId);
-		if (removed == nullptr)
+
+
+
+
+	bool movePaneToNodeEdge(
+		RootNode & aSourceRoot,
+		const std::string & aPaneId,
+		RootNode & aTargetRoot,
+		BaseNode & aTargetNode,
+		WxDockUI::DockPosition aEdge
+	)
+	{
+		// Extract the pane from the source root:
+		auto removed = removePane(aSourceRoot, aPaneId);
+		if (removed.get() == nullptr)
 		{
 			return false;
 		}
-		removed->setIntendedDockPos(aEdge);
 
 		// If target's parent is a TabNode, target the TabNode itself instead
+		auto orientation = orientationForEdge(aEdge);
+		auto parent = aTargetNode.parent();
+		assert(parent != nullptr);  // Cannot replace the root itself
 		BaseNode * effectiveTarget = &aTargetNode;
 		if (parent->type() == NodeType::Tab)
 		{
@@ -720,18 +755,33 @@ namespace WxDockUI::Layout::Ops
 		int aInsertIndex
 	)
 	{
+		return mergePanesIntoTab(aRoot, aToMovePaneId, aRoot, aTargetPaneId, aInsertIndex);
+	}
+
+
+
+
+
+	bool mergePanesIntoTab(
+		RootNode & aSourceRoot,
+		const std::string & aToMovePaneId,
+		RootNode & aTargetRoot,
+		const std::string & aTargetPaneId,
+		int aInsertIndex
+	)
+	{
 		// Check inputs:
 		if (aToMovePaneId == aTargetPaneId)
 		{
 			// Moving onto self, do nothing:
 			return false;
 		}
-		if (findPaneNodeRecursive(aRoot, aTargetPaneId) == nullptr)
+		if (findPaneNodeRecursive(aTargetRoot, aTargetPaneId) == nullptr)
 		{
 			// Target pane not found, do nothing:
 			return false;
 		}
-		auto toMovePane = removePane(aRoot, aToMovePaneId);
+		auto toMovePane = removePane(aSourceRoot, aToMovePaneId);
 		if (toMovePane == nullptr)
 		{
 			// ToMove pane not found, do nothing:
@@ -739,7 +789,7 @@ namespace WxDockUI::Layout::Ops
 		}
 
 		// Wrap the target into a TabNode, if needed:
-		auto targetTab = wrapPaneInTab(aRoot, aTargetPaneId);
+		auto targetTab = wrapPaneInTab(aTargetRoot, aTargetPaneId);
 		assert(targetTab != nullptr);
 
 		// Copy the intended dock pos from the target pane

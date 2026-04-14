@@ -46,6 +46,18 @@ namespace WxDockUI::Layout::Ops
 		int aInsertIndex
 	);
 
+	/** Moves the specified pane as a tab in aTargetTabNode at the specified index, possibly across differing roots.
+	The pane is expected to already be in the root's hierarchy.
+	If the insertion index is not valid, it is moved to the closest valid value.
+	Returns true on success, false on failure (pane not found). */
+	bool movePaneToTab(
+		RootNode & aSourceRoot,
+		const std::string & aPaneId,
+		RootNode & aTargetRoot,
+		TabNode & aTargetTabNode,
+		int aInsertIndex
+	);
+
 	/** Moves the specified pane to the specified edge of the target node, using a SplitNode either already
 	containing or newly replacing the target node.
 	If the target is a PaneNode within a TabNode, the split is made above the TabNode.
@@ -57,11 +69,33 @@ namespace WxDockUI::Layout::Ops
 		WxDockUI::DockPosition aEdge
 	);
 
+	/** Moves the specified pane to the specified edge of the target node, using a SplitNode either already
+	containing or newly replacing the target node, possibly across differing roots.
+	If the target is a PaneNode within a TabNode, the split is made above the TabNode.
+	Basically this corresponds to the GUI operation "(nearest) dock to the side of this pane". */
+	bool movePaneToNodeEdge(
+		RootNode & aSourceRoot,
+		const std::string & aPaneId,
+		RootNode & aTargetRoot,
+		BaseNode & aTargetNode,
+		WxDockUI::DockPosition aEdge
+	);
+
 	/** Moves the source pane so that it makes a tab with the target pane.
 	Returns true if moved, false on failure (pane not found). */
 	bool mergePanesIntoTab(
 		RootNode & aRoot,
 		const std::string & aSourcePaneId,
+		const std::string & aTargetPaneId,
+		int aInsertIndex
+	);
+
+	/** Moves the source pane so that it makes a tab with the target pane, possibly across differing roots.
+	Returns true if moved, false on failure (pane not found). */
+	bool mergePanesIntoTab(
+		RootNode & aSourceRoot,
+		const std::string & aSourcePaneId,
+		RootNode & aTargetRoot,
 		const std::string & aTargetPaneId,
 		int aInsertIndex
 	);

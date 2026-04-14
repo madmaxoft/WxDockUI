@@ -101,8 +101,7 @@ namespace WxDockUI
 				}
 			}
 			auto pos = aTarget.dockPosition();
-			// TODO: Move between roots?
-			didMove = Layout::Ops::movePaneToNodeEdge(targetFrame.rootNode(), paneId, const_cast<Layout::BaseNode &>(*aTarget.mNode), pos);
+			didMove = Layout::Ops::movePaneToNodeEdge(aSourceFrame.rootNode(), paneId, targetFrame.rootNode(), const_cast<Layout::BaseNode &>(*aTarget.mNode), pos);
 		}
 		else if (aTarget.mKind == Internal::DockTarget::Kind::PaneTab)
 		{
@@ -114,13 +113,13 @@ namespace WxDockUI
 			{
 				case Layout::NodeType::Pane:
 				{
-					didMove = Layout::Ops::mergePanesIntoTab(targetFrame.rootNode(), paneId, aTarget.mNode->asPaneNode()->paneId(), -1);
+					didMove = Layout::Ops::mergePanesIntoTab(aSourceFrame.rootNode(), paneId, targetFrame.rootNode(), aTarget.mNode->asPaneNode()->paneId(), -1);
 					break;
 				}
 				case Layout::NodeType::Tab:
 				{
 					auto tabNode = aTarget.mNode->asTabNode();
-					didMove = Layout::Ops::movePaneToTab(targetFrame.rootNode(), paneId, const_cast<Layout::TabNode &>(*tabNode), 0);
+					didMove = Layout::Ops::movePaneToTab(aSourceFrame.rootNode(), paneId, targetFrame.rootNode(), const_cast<Layout::TabNode &>(*tabNode), 0);
 					break;
 				}
 				default:
