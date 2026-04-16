@@ -66,8 +66,8 @@ namespace WxDockUI::Internal
 		auto targetFrame = mDockSystem.managedWindowAtScreenPos(aScreenPos);
 		if (targetFrame == nullptr)
 		{
-			// TODO: Indicate floating
-			mCurrentTarget.reset();
+			mCurrentTarget = DockTarget{};
+			mCurrentTarget->mKind = DockTarget::Kind::Float;
 			updateUI(aScreenPos);
 			return;
 		}
