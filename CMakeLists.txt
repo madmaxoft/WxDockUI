@@ -9,6 +9,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(srcs
 	Src/DockOverlay.cpp
 	Src/DockSystem.cpp
+	Src/FloatingDockFrame.cpp
 	Src/FrameDockManager.cpp
 	Src/DragGhost.cpp
 	Src/Layout.cpp
@@ -32,6 +33,7 @@ set(hdrs
 	Include/WxDockUI/Internal/DockOverlay.hpp
 	Include/WxDockUI/Internal/DockTarget.hpp
 	Include/WxDockUI/Internal/DragGhost.hpp
+	Include/WxDockUI/Internal/FloatingDockFrame.hpp
 	Include/WxDockUI/Internal/FrameDockManager.hpp
 	Include/WxDockUI/Internal/Layout.hpp
 	Include/WxDockUI/Internal/LayoutEngine.hpp

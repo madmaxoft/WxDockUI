@@ -83,23 +83,8 @@ namespace WxDockUI::Internal
 			mTargetFrame->frame()->Raise();
 		}
 
-		auto target = mTargetFrame->dockOverlay().hitTest(aScreenPos);
-		if (!target.isValid())
-		{
-			mCurrentTarget.reset();
-			updateUI(aScreenPos);
-			return;
-		}
-
-		// Only update UI if the target has changed:
-		if (
-			(!mCurrentTarget.has_value()) ||
-			(mCurrentTarget.value() != target)
-		)
-		{
-			mCurrentTarget = target;
-			updateUI(aScreenPos);
-		}
+		mCurrentTarget = mTargetFrame->dockOverlay().hitTest(aScreenPos);
+		updateUI(aScreenPos);
 	}
 
 
@@ -121,6 +106,7 @@ namespace WxDockUI::Internal
 		{
 			// Hide the overlay early so that it doesn't cover the debugger:
 			mTargetFrame->dockOverlay().showOverlay(false);
+
 			mTargetFrame->performDock(*mSourceFrame, *mDraggedPane, mCurrentTarget.value());
 		}
 

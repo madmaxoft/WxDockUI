@@ -12,7 +12,8 @@ namespace WxDockUI::Internal
 
 
 
-	FrameDockManager::FrameDockManager(wxTopLevelWindow & aFrame, DockSystem & aDockSystem):
+	FrameDockManager::FrameDockManager(wxTopLevelWindow & aFrame, DockSystem & aDockSystem, Role aRole):
+		mRole(aRole),
 		mLayoutEngine(*this),
 		mDockOverlay(*this),
 		mDockSystem(aDockSystem),
@@ -84,6 +85,21 @@ namespace WxDockUI::Internal
 	void FrameDockManager::dumpLayout(std::ostream & aOut) const
 	{
 		mRoot.dump(aOut, 1);
+	}
+
+
+
+
+
+	bool FrameDockManager::isEmpty() const
+	{
+		return (
+			(mRoot.child() == nullptr) ||
+			(
+				(mRoot.child()->type() == Layout::NodeType::Tab) &&
+				mRoot.child()->asTabNode()->panes().empty()
+			)
+		);
 	}
 
 

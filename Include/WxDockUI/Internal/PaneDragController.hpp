@@ -1,6 +1,6 @@
 #pragma once
 
-// #include <optional>
+#include <optional>
 
 #include <WxDockUI/Internal/DockTarget.hpp>
 #include <WxDockUI/Internal/DragGhost.hpp>

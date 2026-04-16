@@ -119,6 +119,9 @@ namespace WxDockUI::Internal
 				return result;
 			}
 		}
+		result.mKind = DockTarget::Kind::Float;
+		result.mNode = nullptr;
+		result.mTargetFrame = nullptr;
 		return result;
 	}
 

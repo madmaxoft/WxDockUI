@@ -48,6 +48,8 @@ namespace WxDockUI
 		Internal::ZOrderTracker mZOrderTracker;
 
 
+		Internal::PaneDragController & paneDragController() { return mPaneDragController; }
+
 		/** Returns the target frame for a dock operation, creating a new one if needed (-> floating) */
 		Internal::FrameDockManager & ensureDockTargetFrame(const Internal::DockTarget & aDockTarget);
 
@@ -58,7 +60,11 @@ namespace WxDockUI
 			const Internal::DockTarget & aTarget
 		);
 
-		Internal::PaneDragController & paneDragController() { return mPaneDragController; }
+		/** Destroys the frame and its manager if it is floating and is practically empty. */
+		void destroyIfEmptyFloating(Internal::FrameDockManager & aFrameDockManager);
+
+		/** Destroys the specified frame and its manager, removing it from the registry and ZOrderTracker. */
+		void destroyManagedWindow(Internal::FrameDockManager & aFrameDockManager);
 
 		/** Returns the managed window that is visible at the specified screen position.
 		Returns nullptr if none. */

@@ -38,7 +38,8 @@ namespace WxDockUI::Internal
 			PaneSplitLeft,
 			PaneSplitBottom,
 			PaneSplitRight,
-			PaneTab
+			PaneTab,
+			Float
 		} mKind = Kind::Invalid;
 
 		/** The FrameDockManager into which the node should be docked.
@@ -184,6 +185,14 @@ namespace WxDockUI::Internal
 		/** Returns a human-readable description of the target, used for debugging dumps. */
 		std::string describe() const
 		{
+			if (mKind == Kind::Float)
+			{
+				assert(mTargetFrame == nullptr);
+				assert(mNode == nullptr);
+				return "Float";
+			}
+			assert(mTargetFrame != nullptr);
+			assert(mNode != nullptr);
 			auto pane = mNode->asPaneNode();
 			auto desc = (pane != nullptr) ? pane->paneId() : std::format("Node %p/%d", static_cast<const void *>(mNode), static_cast<int>(mNode->type()));
 			switch (mKind)
@@ -198,6 +207,7 @@ namespace WxDockUI::Internal
 				case Kind::PaneSplitBottom: return std::format("PaneSplitBottom({})", desc);
 				case Kind::PaneSplitRight:  return std::format("PaneSplitRight({})",  desc);
 				case Kind::PaneTab:         return std::format("PaneTab({})",         desc);
+				case Kind::Float:           return "Float";
 			}
 			assert(!"Unknown target kind");
 			return "Unknown target kind";

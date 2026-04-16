@@ -3,6 +3,7 @@
 #include <format>
 
 #include <WxDockUI/Internal/FrameDockManager.hpp>
+#include <WxDockUI/Internal/FloatingDockFrame.hpp>
 #include <WxDockUI/Internal/LayoutOps.hpp>
 
 
@@ -39,8 +40,14 @@ namespace WxDockUI
 		{
 			return const_cast<Internal::FrameDockManager &>(*(aDockTarget.mTargetFrame));
 		}
-		// TODO: Create a new frame and FrameDockManager for the new floating window
-		return **mManagedWindows.begin();
+
+		// Create a new frame and FrameDockManager for the new floating window:
+		auto frame = new Internal::FloatingDockFrame(*this);
+		auto mgr = std::make_unique<Internal::FrameDockManager>(*frame, *this, Internal::FrameDockManager::Role::Floating);
+		frame->setFrameDockManager(*mgr);
+		mZOrderTracker.add(*mgr);
+		mManagedWindows.push_back(std::move(mgr));
+		return frame->frameDockManager();
 	}
 
 
@@ -67,6 +74,7 @@ namespace WxDockUI
 			aSourceFrame.dumpLayout(std::cout);
 			if (&aSourceFrame != &targetFrame)
 			{
+				std::cout << "Target:" << std::endl;
 				targetFrame.dumpLayout(std::cout);
 			}
 		#endif
@@ -119,7 +127,7 @@ namespace WxDockUI
 				case Layout::NodeType::Tab:
 				{
 					auto tabNode = aTarget.mNode->asTabNode();
-					didMove = Layout::Ops::movePaneToTab(aSourceFrame.rootNode(), paneId, targetFrame.rootNode(), const_cast<Layout::TabNode &>(*tabNode), 0);
+					didMove = Layout::Ops::movePaneToTab(aSourceFrame.rootNode(), paneId, targetFrame.rootNode(), const_cast<Layout::TabNode &>(*tabNode), -1);
 					break;
 				}
 				default:
@@ -128,6 +136,19 @@ namespace WxDockUI
 					break;
 				}
 			}
+		}
+		else
+		{
+			assert(targetFrame.rootNode().child()->type() == Layout::NodeType::Tab);
+			assert(targetFrame.rootNode().child()->asTabNode()->panes().empty());
+			auto pane = Layout::Ops::removePane(aSourceFrame.rootNode(), paneId);
+			if (pane == nullptr)
+			{
+				assert(!"Unknown pane");
+				return;
+			}
+			targetFrame.rootNode().setChild(std::move(pane));
+			didMove = true;
 		}
 		if (!didMove)
 		{
@@ -145,6 +166,7 @@ namespace WxDockUI
 			aSourceFrame.dumpLayout(std::cout);
 			if (&aSourceFrame != &targetFrame)
 			{
+				std::cout << "Target:" << std::endl;
 				targetFrame.dumpLayout(std::cout);
 			}
 			std::flush(std::cout);
@@ -157,15 +179,58 @@ namespace WxDockUI
 
 		// Call updateLayout after processing all events, since this performDock call is most likely called
 		// from within an event handler for an object that could get destroyed by the re-layout
-		aSourceFrame.frame()->CallAfter([&aSourceFrame](){
+		aSourceFrame.frame()->CallAfter([this, &aSourceFrame](){
 			aSourceFrame.updateLayout();
+			destroyIfEmptyFloating(aSourceFrame);
 		});
 		if (&aSourceFrame != &targetFrame)
 		{
-			targetFrame.frame()->CallAfter([&targetFrame](){
+			targetFrame.frame()->CallAfter([this, &targetFrame](){
 				targetFrame.updateLayout();
+				if (targetFrame.role() == Internal::FrameDockManager::Role::Floating)
+				{
+					static_cast<Internal::FloatingDockFrame *>(targetFrame.frame())->updateCaption();
+					targetFrame.frame()->Show();
+					targetFrame.frame()->Raise();
+				}
 			});
 		}
+	}
+
+
+
+
+
+	void DockSystem::destroyIfEmptyFloating(Internal::FrameDockManager & aFrameDockManager)
+	{
+		if (aFrameDockManager.role() != Internal::FrameDockManager::Role::Floating)
+		{
+			return;
+		}
+		if (!aFrameDockManager.isEmpty())
+		{
+			return;
+		}
+		destroyManagedWindow(aFrameDockManager);
+	}
+
+
+
+
+
+	void DockSystem::destroyManagedWindow(Internal::FrameDockManager & aFrameDockManager)
+	{
+		mZOrderTracker.remove(aFrameDockManager);
+		auto * frame = aFrameDockManager.frame();
+		for (auto itr = mManagedWindows.begin(), end = mManagedWindows.end(); itr != end; ++itr)
+		{
+			if (itr->get()->frame() == frame)
+			{
+				mManagedWindows.erase(itr);
+				break;
+			}
+		}
+		frame->Destroy();
 	}
 
 
@@ -192,7 +257,7 @@ namespace WxDockUI
 			}
 		}
 
-		auto mgr = std::make_unique<Internal::FrameDockManager>(aWindow, *this);
+		auto mgr = std::make_unique<Internal::FrameDockManager>(aWindow, *this, Internal::FrameDockManager::Role::Host);
 		mZOrderTracker.add(*mgr);
 		mManagedWindows.push_back(std::move(mgr));
 	}

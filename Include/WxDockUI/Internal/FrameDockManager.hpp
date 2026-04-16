@@ -43,6 +43,20 @@ namespace WxDockUI::Internal
 	/** The docking manager for a single top-level window. */
 	class FrameDockManager
 	{
+	public:
+
+		enum Role
+		{
+			Host,      ///< Frame was created by the client code (DockSystem::manageWindow()), persistent
+			Floating,  ///< Frame was created by floating a pane, will get destroyed when empty
+		};
+
+
+	private:
+
+		/** Role of the frame: host or floating. */
+		Role mRole;
+
 		/** The layout engine used to manager the layout of the panes. */
 		WxDockUI::Layout::LayoutEngine mLayoutEngine;
 
@@ -67,7 +81,7 @@ namespace WxDockUI::Internal
 
 		/** Creates a new instance of the manager bound to the specified frame,
 		and attaches it to the specified dock system. */
-		explicit FrameDockManager(wxTopLevelWindow & aFrame, DockSystem & aDockSystem);
+		FrameDockManager(wxTopLevelWindow & aFrame, DockSystem & aDockSystem, Role aRole);
 
 		~FrameDockManager();
 
@@ -86,12 +100,16 @@ namespace WxDockUI::Internal
 		void dumpLayout(std::ostream & aOut) const;
 
 		// Getters:
+		Role role() const { return mRole; }
 		WxDockUI::Layout::LayoutEngine & layoutEngine() { return mLayoutEngine; }
 		WxDockUI::Internal::DockOverlay & dockOverlay() { return mDockOverlay; }
 		WxDockUI::Layout::RootNode & rootNode() { return mRoot; }
 		WxDockUI::DockSystem & dockSystem() { return mDockSystem; }
 
 		wxTopLevelWindow * frame() const { return &mFrame; }
+
+		/** Returns true if the layout is practically empty - no pane contained. */
+		bool isEmpty() const;
 
 		/** Returns the wxWindow that is contained in the specified PaneNode, or nullptr if not found. */
 		wxWindow * findPaneWindow(const Layout::PaneNode & aPaneNode) const { return findPaneWindow(aPaneNode.paneId()); }
