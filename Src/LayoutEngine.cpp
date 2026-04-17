@@ -25,7 +25,7 @@ namespace WxDockUI::Layout
 			if (aSet.find(itr->first) == aSet.end())
 			{
 				#ifdef WXDOCKUI_DEBUG_LIFETIME
-					std::cout << "Pruning container at " << itr->second << "." << std::endl;
+					std::cout << "Pruning container at " << itr->second << ": layout node at " << &(itr->second->layoutNode()) <<  std::endl;
 				#endif
 				itr = aMap.erase(itr);
 			}

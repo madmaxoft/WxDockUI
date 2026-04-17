@@ -4,6 +4,8 @@
 #include <wx/stattext.h>
 #include <wx/sizer.h>
 
+#include "Layout.hpp"
+
 
 
 
@@ -14,10 +16,6 @@ namespace WxDockUI
 	namespace Internal
 	{
 		class FrameDockManager;
-	}
-	namespace Layout
-	{
-		class PaneNode;
 	}
 }
 
@@ -85,6 +83,10 @@ namespace WxDockUI::Internal
 
 		/** Sets whether mCaptionBar should be shown in the container. */
 		void showCaptionBar(bool aShouldShow);
+
+		/** Returns the layout node represented by this container.
+		Unified across PaneContainer, SplitContainer and TabContainer. */
+		const Layout::BaseNode & layoutNode() const { return mPaneNode; }
 	};
 
 

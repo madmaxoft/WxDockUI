@@ -52,7 +52,10 @@ namespace WxDockUI::Internal
 	void FrameDockManager::onFrameDestroy(wxWindowDestroyEvent & aEvent)
 	{
 		aEvent.Skip();
-		mDockSystem.onManagedWindowDestroy(*this);
+		if (aEvent.GetWindow() == &mFrame)
+		{
+			mDockSystem.onManagedWindowDestroy(*this);
+		}
 	}
 
 

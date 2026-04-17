@@ -4,6 +4,8 @@
 #include <wx/panel.h>
 #include <wx/notebook.h>
 
+#include "Layout.hpp"
+
 
 
 
@@ -16,11 +18,6 @@ namespace WxDockUI
 	namespace Internal
 	{
 		class FrameDockManager;
-	}
-	namespace Layout
-	{
-		class TabNode;
-		class PaneNode;
 	}
 }
 
@@ -119,6 +116,10 @@ namespace WxDockUI::Internal
 		void updateTabs();
 
 		const Layout::TabNode & tabNode() const { return mTabNode; }
+
+		/** Returns the layout node represented by this container.
+		Unified across PaneContainer, SplitContainer and TabContainer. */
+		const Layout::BaseNode & layoutNode() const { return mTabNode; }
 	};
 
 

@@ -3,6 +3,8 @@
 #include <vector>
 #include <wx/panel.h>
 
+#include "Layout.hpp"
+
 
 
 
@@ -13,11 +15,6 @@ namespace WxDockUI
 	namespace Internal
 	{
 		class FrameDockManager;
-	}
-	namespace Layout
-	{
-		class SplitNode;
-		class PaneNode;
 	}
 }
 
@@ -103,6 +100,10 @@ namespace WxDockUI::Internal
 		/** Reparents all children into mFrameDockManager's frame.
 		Used before destruction of this class to avoid actually destroying child windows that are owned elsewhere. */
 		void clear();
+
+		/** Returns the layout node represented by this container.
+		Unified across PaneContainer, SplitContainer and TabContainer. */
+		const Layout::BaseNode & layoutNode() const { return mSplitNode; }
 	};
 
 
