@@ -1,5 +1,6 @@
 #include <WxDockUI/Internal/FrameDockManager.hpp>
 #include <WxDockUI/Internal/LayoutOps.hpp>
+#include <WxDockUI/Internal/PerfTrace.hpp>
 
 
 
@@ -21,7 +22,8 @@ namespace WxDockUI::Internal
 	{
 		mRoot.setChild(std::make_unique<Layout::TabNode>());
 
-		aFrame.Bind(wxEVT_SIZE, &FrameDockManager::onFrameSize, this);
+		aFrame.Bind(wxEVT_SIZE,    &FrameDockManager::onFrameSize, this);
+		aFrame.Bind(wxEVT_DESTROY, &FrameDockManager::onFrameDestroy, this);
 	}
 
 
@@ -41,6 +43,16 @@ namespace WxDockUI::Internal
 	{
 		aEvent.Skip();
 		updateLayout();
+	}
+
+
+
+
+
+	void FrameDockManager::onFrameDestroy(wxWindowDestroyEvent & aEvent)
+	{
+		aEvent.Skip();
+		mDockSystem.onManagedWindowDestroy(*this);
 	}
 
 

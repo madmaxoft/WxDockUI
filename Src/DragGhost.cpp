@@ -15,7 +15,7 @@ namespace WxDockUI::Internal
 		Super(
 			nullptr,  // No parent
 			wxID_ANY,
-			"",  // No caption
+			"DragGhost",
 			wxDefaultPosition,
 			wxDefaultSize,
 			wxFRAME_NO_TASKBAR | wxSTAY_ON_TOP | wxBORDER_NONE | wxFRAME_SHAPED

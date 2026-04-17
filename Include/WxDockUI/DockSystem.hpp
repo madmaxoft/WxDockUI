@@ -14,6 +14,7 @@
 namespace WxDockUI::Internal
 {
 	class FrameDockManager;
+	class FloatingDockFrame;
 }
 
 
@@ -34,6 +35,7 @@ namespace WxDockUI
 	{
 		friend class Internal::FrameDockManager;
 		friend class Internal::PaneDragController;
+		friend class Internal::FloatingDockFrame;
 
 		/** All the managed windows, wrapped in a FrameDockManager instance. */
 		std::vector<std::unique_ptr<Internal::FrameDockManager>> mManagedWindows;
@@ -65,6 +67,10 @@ namespace WxDockUI
 
 		/** Destroys the specified frame and its manager, removing it from the registry and ZOrderTracker. */
 		void destroyManagedWindow(Internal::FrameDockManager & aFrameDockManager);
+
+		/** Called by aFrameDockManager when the frame is about to be destroyed.
+		Removes the management and deletes the aFrameDockManager. */
+		void onManagedWindowDestroy(Internal::FrameDockManager & aFrameDockManager);
 
 		/** Returns the managed window that is visible at the specified screen position.
 		Returns nullptr if none. */

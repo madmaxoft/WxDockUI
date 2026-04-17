@@ -2,8 +2,7 @@
 
 #include <string>
 
-#include <wx/frame.h>
-#include <wx/sizer.h>
+#include <wx/wx.h>
 
 #include <WxDockUI/Internal/DockTarget.hpp>
 #include <WxDockUI/Internal/DockOverlay.hpp>
@@ -75,6 +74,10 @@ namespace WxDockUI::Internal
 
 		/** Called by WX when mFrame is resized. Adjusts the layout to fill the frame. */
 		void onFrameSize(wxSizeEvent & aEvent);
+
+		/** Calle dby WX when mFrame is about to be destroyed. Notifies mDockSystem about the destruction,
+		which destroys this instance. */
+		void onFrameDestroy(wxWindowDestroyEvent & aEvent);
 
 
 	public:

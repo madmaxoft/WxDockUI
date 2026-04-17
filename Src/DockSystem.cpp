@@ -5,6 +5,7 @@
 #include <WxDockUI/Internal/FrameDockManager.hpp>
 #include <WxDockUI/Internal/FloatingDockFrame.hpp>
 #include <WxDockUI/Internal/LayoutOps.hpp>
+#include <WxDockUI/Internal/PerfTrace.hpp>
 
 
 
@@ -60,6 +61,7 @@ namespace WxDockUI
 		const Internal::DockTarget & aTarget
 	)
 	{
+		WXDOCKUI_PROFILE_SCOPE("DockSystem::performDock");
 		if (!aTarget.isValid())
 		{
 			return;
@@ -220,17 +222,24 @@ namespace WxDockUI
 
 	void DockSystem::destroyManagedWindow(Internal::FrameDockManager & aFrameDockManager)
 	{
+		aFrameDockManager.frame()->Destroy();
+	}
+
+
+
+
+
+	void DockSystem::onManagedWindowDestroy(Internal::FrameDockManager & aFrameDockManager)
+	{
 		mZOrderTracker.remove(aFrameDockManager);
-		auto * frame = aFrameDockManager.frame();
 		for (auto itr = mManagedWindows.begin(), end = mManagedWindows.end(); itr != end; ++itr)
 		{
-			if (itr->get()->frame() == frame)
+			if (itr->get() == &aFrameDockManager)
 			{
 				mManagedWindows.erase(itr);
 				break;
 			}
 		}
-		frame->Destroy();
 	}
 
 

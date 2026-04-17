@@ -25,7 +25,7 @@ namespace WxDockUI::Internal
 		Super(
 			nullptr,
 			wxID_ANY,
-			wxEmptyString,
+			"DockOverlay",
 			wxDefaultPosition,
 			wxDefaultSize,
 			wxFRAME_NO_TASKBAR | wxFRAME_TOOL_WINDOW | wxSTAY_ON_TOP | wxBORDER_NONE

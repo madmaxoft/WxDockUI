@@ -1,10 +1,23 @@
 #include <WxDockUI/Internal/FloatingDockFrame.hpp>
 
+#include <WxDockUI/DockSystem.hpp>
+
 
 
 
 namespace WxDockUI::Internal
 {
+	namespace
+	{
+		long floatingFrameStyle()
+		{
+			#ifdef __WXMSW__
+				return wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU | wxFRAME_NO_TASKBAR | wxSTAY_ON_TOP;
+			#else
+				return wxCAPTION | wxFRAME_NO_TASKBAR | wxSTAY_ON_TOP | wxFRAME_TOOL_WINDOW;
+			#endif
+		}
+	}
 
 
 
@@ -17,7 +30,7 @@ namespace WxDockUI::Internal
 			"",  // No caption
 			wxGetMousePosition(),
 			wxSize(200, 200),
-			wxFRAME_NO_TASKBAR | wxSTAY_ON_TOP | wxFRAME_TOOL_WINDOW
+			floatingFrameStyle()
 		),
 		mDockSystem(aDockSystem)
 	{
@@ -40,8 +53,13 @@ namespace WxDockUI::Internal
 
 	void FloatingDockFrame::onClose(wxCloseEvent & aEvent)
 	{
-		aEvent.Skip();
-		// TODO: Notify mDockSystem
+		if (mFrameDockManager == nullptr)
+		{
+			aEvent.Skip();
+			return;
+		}
+
+		mDockSystem.destroyManagedWindow(*mFrameDockManager);
 	}
 
 
